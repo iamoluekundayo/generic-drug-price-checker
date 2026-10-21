@@ -17,7 +17,6 @@ connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite")
 # Create the engine; an object as a connection the database
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
-
 # Session: a workspace for one unit of work
 SessionLocal = sessionmaker(bind=engine)
 
