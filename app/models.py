@@ -26,7 +26,3 @@ class Price(Base):
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
     __table_args__ = (Index("ix_prices_drug_date", "drug_id", "effective_date"),)
-
-
-# Generate the tables
-Base.metadata.create_all(engine)
