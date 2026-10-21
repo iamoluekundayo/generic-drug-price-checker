@@ -7,6 +7,7 @@ from app import models
 from app.db import Base, engine
 
 
+# Create models, one class per table
 class Drug(Base):
     __tablename__ = "drugs"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -27,4 +28,5 @@ class Price(Base):
     __table_args__ = (Index("ix_prices_drug_date", "drug_id", "effective_date"),)
 
 
+# Generate the tables
 Base.metadata.create_all(engine)
