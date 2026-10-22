@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import Depends, FastAPI
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -18,5 +20,5 @@ Base.metadata.create_all(engine)
 
 
 @app.get("/drugs")
-def search_dug(q: str, db: Session = Depends(get_db)):
+def search_drug(q: str, db: Annotated[Session, Depends(get_db)]):
     return db.scalars(select(Drug).where(Drug.description.ilike(f"%{q}%"))).all()
