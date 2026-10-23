@@ -27,7 +27,4 @@ class Price(Base):
     effective_date: Mapped[date]
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
-    __table_args__ = (
-        UniqueConstraint("drug_id", "effective_date"),
-        Index("ix_prices_drug_date", "drug_id", "effective_date"),
-    )
+    __table_args__ = (Index("ix_prices_drug_date", "drug_id", "effective_date"),)
