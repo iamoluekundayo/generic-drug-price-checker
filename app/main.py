@@ -27,5 +27,5 @@ def home():
 
 
 @app.get("/drugs")
-def search_drug(q: str, db: Annotated[Session, Depends(get_db)]):
+def get_drug(q: str, db: Annotated[Session, Depends(get_db)]):
     return db.scalars(select(Drug).where(Drug.description.ilike(f"%{q}%"))).all()
