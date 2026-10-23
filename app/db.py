@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 # libraries to build engine, base class, to make sessions
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 # read .env file
@@ -16,6 +16,14 @@ connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite")
 
 # Create the engine; an object as a connection the database
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
+
+
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    if DATABASE_URL.startswith("sqlite"):
+        cursor.execute("PRAGMA foreign_keys = ON")
+    cursor.close()
 
 
 # Session: a workspace for one unit of work
