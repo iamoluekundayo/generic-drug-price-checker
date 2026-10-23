@@ -15,6 +15,10 @@ class Drug(Base):
     description: Mapped[str]
     pricing_unit: Mapped[str]
     prices: Mapped[list["Price"]] = relationship(back_populates="drug")
+    is_otc: Mapped[bool]
+    last_seen: Mapped[date]
+    explanation_codes: Mapped[str]
+    classification: Mapped[str]
 
 
 class Price(Base):
