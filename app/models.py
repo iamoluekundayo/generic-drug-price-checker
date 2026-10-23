@@ -17,8 +17,6 @@ class Drug(Base):
     prices: Mapped[list["Price"]] = relationship(back_populates="drug")
     is_otc: Mapped[bool]
     last_seen: Mapped[date]
-    explanation_codes: Mapped[str]
-    classification: Mapped[str]
 
 
 class Price(Base):
@@ -29,6 +27,8 @@ class Price(Base):
     )  # ForeignKey constraint
     nadac_per_unit: Mapped[float]
     effective_date: Mapped[date]
+    explanation_codes: Mapped[str]
+    classification: Mapped[str]
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
     # no two rows may have the same values in these columns
