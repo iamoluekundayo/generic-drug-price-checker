@@ -27,4 +27,12 @@ class Price(Base):
     effective_date: Mapped[date]
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
-    __table_args__ = (Index("ix_prices_drug_date", "drug_id", "effective_date"),)
+    # no two rows may have the same values in these columns
+    __table_args__ = (UniqueConstraint("drug_id", "effective_date"),)
+
+
+# Denormalization
+class LatestPrice(Base):
+    __tablename__ = "latest_prices"
+    drug_id: Mapped[int] = mapped_column(ForeignKey("drugs.id"))
+    effective_date: Mapped[date]
