@@ -20,7 +20,7 @@ class Drug(Base):
     last_seen: Mapped[date]
 
     def __repr__(self):
-        return f"<Drug {self.id} {self.ndc} {self.description} {self.pricing_unit}{self.prices}{self.is_otc}{self.last_seen}"
+        return f"<Drug id={self.id}, ndc={self.ndc}, description={self.description}, pricing_unit={self.pricing_unit}, prices={self.prices}, is_otc={self.is_otc} last_seen={self.last_seen}"
 
 
 class Price(Base):
@@ -45,3 +45,7 @@ class Price(Base):
 #     id: Mapped[int] = mapped_column(primary_key=True)
 #     drug_id: Mapped[int] = mapped_column(ForeignKey("drugs.id"))
 #     effective_date: Mapped[date]
+
+
+with SessionLocal() as db:
+    print(db.scalars(select(Drug)).first())
