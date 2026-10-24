@@ -1,10 +1,10 @@
 from datetime import date
 from decimal import Decimal
 
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db import Base
+from app.db import Base, SessionLocal, engine
 
 
 # Create models, one class per table
@@ -19,6 +19,9 @@ class Drug(Base):
     is_otc: Mapped[bool]
     last_seen: Mapped[date]
 
+    def __repr__(self):
+        return f"<Drug {self.id} {self.ndc} {self.description} {self.pricing_unit}{self.prices}{self.is_otc}{self.last_seen}"
+
 
 class Price(Base):
     __tablename__ = "prices"
@@ -32,7 +35,7 @@ class Price(Base):
     classification: Mapped[str]
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
-    # no two rows may have the same values in these columns
+    # using (NDC, effective date) as price's identify
     __table_args__ = (UniqueConstraint("drug_id", "effective_date"),)
 
 
