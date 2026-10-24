@@ -28,7 +28,7 @@ class Price(Base):
     )  # ForeignKey constraint
     nadac_per_unit: Mapped[Decimal]
     effective_date: Mapped[date]
-    explanation_codes: Mapped[str]
+    explanation_code: Mapped[str]
     classification: Mapped[str]
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
