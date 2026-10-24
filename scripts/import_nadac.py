@@ -2,18 +2,37 @@ import csv
 from datetime import datetime
 from decimal import Decimal
 
+from app.db import Base, SessionLocal, engine
+from app.models import Drug
+
 
 def main():
-    with open(
-        "data/nadac-national-average-drug-acquisition-cost-10-21-2026.csv",
-        newline="",
-        encoding="utf-8",
-    ) as file:
+    Base.metadata.create_all(engine)
+    with (
+        open(
+            "data/nadac-national-average-drug-acquisition-cost-10-21-2026.csv",
+            newline="",
+            encoding="utf-8",
+        ) as file,
+        SessionLocal() as session,
+    ):
         reader = csv.DictReader(file)
-        for index, row in enumerate(reader):
-            print(parse_row(row))
-            if index == 3:
-                break
+        seen = set()
+        for row in reader:
+            ndc = parse_row(row)
+            if ndc["ndc"] not in seen:
+                session.add(
+                    Drug(
+                        ndc=ndc["ndc"],
+                        description=ndc["description"],
+                        pricing_unit=ndc["pricing_unit"],
+                        is_otc=ndc["is_otc"],
+                        last_seen=ndc["as_of_date"],
+                    )
+                )
+                seen.add(ndc["ndc"])
+        session.commit()
+        print(len(seen))
 
 
 def parse_row(row):
@@ -25,7 +44,7 @@ def parse_row(row):
         "nadac_per_unit": Decimal(row["NADAC Per Unit"]),
         "effective_date": datetime.strptime(row["Effective Date"], "%m/%d/%Y").date(),
         "as_of_date": datetime.strptime(row["As of Date"], "%m/%d/%Y").date(),
-        "explanation_code": row["Explanation Code"],
+        "explanation_codes": row["Explanation Code"],
         "classification": row["Classification for Rate Setting"],
     }
 
