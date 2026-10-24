@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -25,7 +26,7 @@ class Price(Base):
     drug_id: Mapped[int] = mapped_column(
         ForeignKey("drugs.id")
     )  # ForeignKey constraint
-    nadac_per_unit: Mapped[float]
+    nadac_per_unit: Mapped[Decimal]
     effective_date: Mapped[date]
     explanation_codes: Mapped[str]
     classification: Mapped[str]
@@ -36,7 +37,8 @@ class Price(Base):
 
 
 # Denormalization
-class LatestPrice(Base):
-    __tablename__ = "latest_prices"
-    drug_id: Mapped[int] = mapped_column(ForeignKey("drugs.id"))
-    effective_date: Mapped[date]
+# class LatestPrice(Base):
+#     __tablename__ = "latest_prices"
+#     id: Mapped[int] = mapped_column(primary_key=True)
+#     drug_id: Mapped[int] = mapped_column(ForeignKey("drugs.id"))
+#     effective_date: Mapped[date]
