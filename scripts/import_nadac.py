@@ -2,6 +2,8 @@ import csv
 from datetime import datetime
 from decimal import Decimal
 
+from sqlalchemy import select
+
 from app.db import Base, SessionLocal, engine
 from app.models import Drug
 
@@ -17,22 +19,24 @@ def main():
         SessionLocal() as session,
     ):
         reader = csv.DictReader(file)
-        seen = set()
+        drugs = session.scalars(select(Drug)).all()
+        current_drugs = {drug.ndc: drug for drug in drugs}
+        new_drugs = 0
         for row in reader:
             ndc = parse_row(row)
-            if ndc["ndc"] not in seen:
-                session.add(
-                    Drug(
-                        ndc=ndc["ndc"],
-                        description=ndc["description"],
-                        pricing_unit=ndc["pricing_unit"],
-                        is_otc=ndc["is_otc"],
-                        last_seen=ndc["as_of_date"],
-                    )
+            if ndc["ndc"] not in current_drugs:
+                new_drug = Drug(
+                    ndc=ndc["ndc"],
+                    description=ndc["description"],
+                    pricing_unit=ndc["pricing_unit"],
+                    is_otc=ndc["is_otc"],
+                    last_seen=ndc["as_of_date"],
                 )
-                seen.add(ndc["ndc"])
+                session.add(new_drug)
+                current_drugs[new_drug.ndc] = new_drug
+                new_drugs += 1
         session.commit()
-        print(len(seen))
+        print(new_drugs)
 
 
 def parse_row(row):
