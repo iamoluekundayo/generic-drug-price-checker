@@ -19,6 +19,7 @@ def main():
         SessionLocal() as session,
     ):
         reader = csv.DictReader(file)
+        # Load drugs table
         drugs = session.scalars(select(Drug)).all()
         current_drugs = {drug.ndc: drug for drug in drugs}
         new_drugs = 0
@@ -48,7 +49,7 @@ def parse_row(row):
         "nadac_per_unit": Decimal(row["NADAC Per Unit"]),
         "effective_date": datetime.strptime(row["Effective Date"], "%m/%d/%Y").date(),
         "as_of_date": datetime.strptime(row["As of Date"], "%m/%d/%Y").date(),
-        "explanation_codes": row["Explanation Code"],
+        "explanation_code": row["Explanation Code"],
         "classification": row["Classification for Rate Setting"],
     }
 
