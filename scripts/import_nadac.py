@@ -37,10 +37,10 @@ def main():
             if parsed["ndc"] not in drug_by_ndc:
                 drug = Drug(
                     ndc=parsed["ndc"],
-                    description=parsed["description"],
+                    ndc_description=parsed["ndc_description"],
                     pricing_unit=parsed["pricing_unit"],
                     is_otc=parsed["is_otc"],
-                    last_seen=parsed["as_of_date"],
+                    last_seen_date=parsed["as_of_date"],
                 )
                 session.add(drug)
                 drug_by_ndc[drug.ndc] = drug
@@ -65,7 +65,7 @@ def main():
 def parse_row(row):
     return {
         "ndc": row["NDC"],
-        "description": row["NDC Description"],
+        "ndc_description": row["NDC Description"],
         "pricing_unit": row["Pricing Unit"],
         "is_otc": row["OTC"] == "Y",
         "nadac_per_unit": Decimal(row["NADAC Per Unit"]),
