@@ -1,3 +1,14 @@
+"""
+Load a NADAC weekly price file into the database.
+
+The CSV has one row per NDC per weekly list, so a years's file have over a million rows. A price, however, changes only about once a month. The script therefore stores:
+
+* one ``Drug`` per NDC, and
+* one ``Price`` per (NDC, effective date), skipping the weekly repeats
+
+The import is idempotent: running it again on the same adds nothing.
+"""
+
 import csv
 from datetime import datetime
 from decimal import Decimal
@@ -11,6 +22,16 @@ CSV_PATH = "data/nadac-national-average-drug-acquisition-cost-10-21-2026.csv"
 
 
 def main():
+    """Read the CSV and insert any drugs and prices not already stored.
+
+    Steps:
+        1. Create the tables if they do not exist yet.
+        2. Load the NDCs and (NDC, effective date) pairs already in the database, so each CSV row can be checked without a query.
+        3. Walk the CSV once, adding new drugs and new prices.
+        4. Commit everything in a single transaction and print the counts.
+    """
+
+    # create_all only adds missing tables
     Base.metadata.create_all(engine)
     with (
         open(
@@ -20,12 +41,15 @@ def main():
         ) as csv_file,
         SessionLocal() as session,
     ):
+        # DictReader streams one row at a time, so the whole file is never
+        # held in memory.
         reader = csv.DictReader(csv_file)
-        # Load existing drugs into drug_by_ndc
+
+        # Look drugs up by NDC in memory instead of querying once per row.
         existing_drugs = session.scalars(select(Drug)).all()
         drug_by_ndc = {drug.ndc: drug for drug in existing_drugs}
 
-        # Load existing price pairs into existing_price_keys
+        # A price is identified by (NDC, effective date)
         price_rows = session.execute(
             select(Drug.ndc, Price.effective_date).join(Price, Drug.id == Price.drug_id)
         ).all()
@@ -46,6 +70,8 @@ def main():
                 drug_by_ndc[drug.ndc] = drug
                 new_drug_count += 1
 
+            # The same price appears in every weekly list until it changes;
+            # only the first occurrence of each (NDC, effective date) is kept.
             if (parsed["ndc"], parsed["effective_date"]) not in existing_price_keys:
                 price = Price(
                     drug=drug_by_ndc[parsed["ndc"]],
@@ -57,12 +83,25 @@ def main():
                 session.add(price)
                 existing_price_keys.add((parsed["ndc"], parsed["effective_date"]))
                 new_price_count += 1
+
+        # One commit: if anything fails, the whole import is rolled back
         session.commit()
         print(new_drug_count)
         print(new_price_count)
 
 
 def parse_row(row):
+    """Convert on raw CSV row into typed values.
+
+    Args:
+        row: A dictionary from ``csv.DictReader``, keyed by the CSV headers.
+
+    Returns:
+        A dictionary with the NDC and descriptive text unchanged, the OTC flag
+        as a bool, the price as a  ``Decimal`` (exact, unlike float), and both
+        dates as ``date`` objects.
+
+    """
     return {
         "ndc": row["NDC"],
         "ndc_description": row["NDC Description"],
