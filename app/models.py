@@ -13,14 +13,14 @@ class Drug(Base):
     __tablename__ = "drugs"
     id: Mapped[int] = mapped_column(primary_key=True)
     ndc: Mapped[str] = mapped_column(unique=True, index=True)
-    description: Mapped[str]
+    ndc_description: Mapped[str]
     pricing_unit: Mapped[str]
     prices: Mapped[list["Price"]] = relationship(back_populates="drug")
     is_otc: Mapped[bool]
-    last_seen: Mapped[date]
+    last_seen_date: Mapped[date]
 
     def __repr__(self):
-        return f"Drug id={self.id}, ndc={self.ndc}, description={self.description}, pricing_unit={self.pricing_unit}, is_otc={self.is_otc}, last_seen={self.last_seen}"
+        return f"Drug id={self.id}, ndc={self.ndc}, description={self.ndc_description}, pricing_unit={self.pricing_unit}, is_otc={self.is_otc}, last_seen={self.last_seen_date}"
 
 
 class Price(Base):
@@ -36,7 +36,11 @@ class Price(Base):
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
     # using (NDC, effective date) as price's identify
-    __table_args__ = (UniqueConstraint("drug_id", "effective_date"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "drug_id", "effective_date", name="uq_prices_drug_id_effective_date"
+        ),
+    )
 
 
 # Denormalization
