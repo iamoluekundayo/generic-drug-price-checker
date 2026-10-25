@@ -1,10 +1,10 @@
 from datetime import date
 from decimal import Decimal
 
-from sqlalchemy import ForeignKey, UniqueConstraint, select
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db import Base, SessionLocal, engine
+from app.db import Base
 
 
 # Create models, one class per table
@@ -20,7 +20,7 @@ class Drug(Base):
     last_seen: Mapped[date]
 
     def __repr__(self):
-        return f"<Drug id={self.id}, ndc={self.ndc}, description={self.description}, pricing_unit={self.pricing_unit}, prices={self.prices}, is_otc={self.is_otc} last_seen={self.last_seen}"
+        return f"Drug id={self.id}, ndc={self.ndc}, description={self.description}, pricing_unit={self.pricing_unit}, is_otc={self.is_otc}, last_seen={self.last_seen}"
 
 
 class Price(Base):
@@ -45,7 +45,3 @@ class Price(Base):
 #     id: Mapped[int] = mapped_column(primary_key=True)
 #     drug_id: Mapped[int] = mapped_column(ForeignKey("drugs.id"))
 #     effective_date: Mapped[date]
-
-
-with SessionLocal() as db:
-    print(db.scalars(select(Drug)).first())
