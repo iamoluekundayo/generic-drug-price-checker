@@ -69,6 +69,8 @@ def main():
                 session.add(drug)
                 drug_by_ndc[drug.ndc] = drug
                 new_drug_count += 1
+                drug = drug_by_ndc[parsed["ndc"]]
+                drug.last_seen_date = max(parsed["as_of_date"], drug.last_seen_date)
 
             # The same price appears in every weekly list until it changes;
             # only the first occurrence of each (NDC, effective date) is kept.
