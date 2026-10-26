@@ -23,6 +23,9 @@ async def lifespan(app):
 app = FastAPI(lifespan=lifespan)
 
 
+# TODO: Move routes to app/routers
+
+
 @app.get("/")
 def home():
     return {"status": "ok"}
