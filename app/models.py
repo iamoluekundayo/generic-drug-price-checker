@@ -8,7 +8,7 @@
 from datetime import date
 from decimal import Decimal
 
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import ForeignKey, Numeric, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -46,7 +46,7 @@ class Price(Base):
     drug_id: Mapped[int] = mapped_column(
         ForeignKey("drugs.id")
     )  # ForeignKey constraint
-    nadac_per_unit: Mapped[Decimal]
+    nadac_per_unit: Mapped[Decimal] = mapped_column(Numeric(10, 5))
     effective_date: Mapped[date]
     # CMS explanation codes for why the rate is what it is. May hold several,
     # such as "1, 5", so it kept as text.
