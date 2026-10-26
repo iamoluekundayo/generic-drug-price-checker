@@ -1,13 +1,13 @@
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlalchemy import func, select, tuple_
 from sqlalchemy.orm import Session
 
 from app.db import Base, engine, get_db
 from app.models import Drug, Price
-from app.schemas import DrugResult
+from app.schemas import DrugResult, PriceResult
 
 
 @asynccontextmanager
@@ -60,3 +60,14 @@ def search_drugs(
         .offset((page - 1) * page_size)
     ).all()
     return page_rows
+
+
+@app.get("/drugs/{drug_id}/prices", response_model=list[PriceResult])
+def get_price_history(drug_id: int, db: Annotated[Session, Depends(get_db)]):
+    if db.get(Drug, drug_id) is None:
+        raise HTTPException(status_code=404, detail="Drug not found")
+    return db.execute(
+        select(Price.effective_date, Price.nadac_per_unit)
+        .where(Price.drug_id == drug_id)
+        .order_by(Price.effective_date.desc())
+    ).all()

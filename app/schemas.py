@@ -13,3 +13,10 @@ class DrugResult(BaseModel):
     nadac_per_unit: Decimal
     effective_date: date
     model_config = ConfigDict(from_attributes=True)
+
+
+# Add Get /drugs/{id}/prices search endpoint and schemas
+class PriceResult(BaseModel):
+    effective_date: date
+    nadac_per_unit: Decimal
+    model_config = ConfigDict(from_attributes=True)
