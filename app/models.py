@@ -53,7 +53,6 @@ class Price(Base):
     explanation_code: Mapped[str]
     # G (generic), B (brand), B-ANDA or B-BIO
     classification: Mapped[str]
-
     # Python-side shortcut to the owning drug; not a database column
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
