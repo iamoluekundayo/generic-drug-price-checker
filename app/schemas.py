@@ -1,3 +1,5 @@
+"""Pydantic schemas: the shapes of JSON the API accepts and returns."""
+
 from datetime import date
 from decimal import Decimal
 

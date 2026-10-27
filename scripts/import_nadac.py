@@ -117,5 +117,7 @@ def parse_row(row):
     }
 
 
+# TODO: Clean missing or dirty values
+# TODO: Set last_seen on each import
 if __name__ == "__main__":
     main()
