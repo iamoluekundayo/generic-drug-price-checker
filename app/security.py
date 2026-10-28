@@ -39,6 +39,9 @@ def hash_password(password: str) -> str:
     return password_hash.hash(password)
 
 
+DUMMY_HASH = hash_password("any fixed string")
+
+
 def verify_password(password: str, hashed: str) -> bool:
     """Return True if ``password`` matches the stored hash ``hashed``."""
     return password_hash.verify(password, hashed)
