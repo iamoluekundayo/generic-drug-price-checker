@@ -73,6 +73,8 @@ class Price(Base):
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
+    first_name: Mapped[str]
+    last_name: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     password_hash: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
@@ -91,3 +93,6 @@ class Quote(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     user: Mapped["User"] = relationship(back_populates="quotes")
     drug: Mapped["Drug"] = relationship()
+
+
+# note to me: relationship let you link by object instead of by id, and back_populates makes both sides reflect the link immediately

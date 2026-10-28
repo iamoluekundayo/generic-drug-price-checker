@@ -1,4 +1,3 @@
-from decimal import ROUND_HALF_UP, Decimal
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -7,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Drug, Price
+from app.pricing import get_compare_numbers
 from app.schemas import CompareRequest, CompareResult, DrugResult, PriceResult
 
 router = APIRouter(tags=["drugs"])
@@ -72,14 +72,9 @@ def compare(body: CompareRequest, db: Annotated[Session, Depends(get_db)]):
     if price_row is None:
         raise HTTPException(status_code=404, detail="Price not found")
 
-    nadac_total = price_row.nadac_per_unit * body.quantity
-    difference = body.quoted_price - nadac_total
-    if nadac_total == 0:
-        markup_percent = None
-    else:
-        markup_percent = ((difference / nadac_total) * 100).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
+    compare_numbers = get_compare_numbers(
+        price_row.nadac_per_unit, body.quantity, body.quoted_price
+    )
     return CompareResult(
         drug_id=drug.id,
         ndc_description=drug.ndc_description,
@@ -88,7 +83,7 @@ def compare(body: CompareRequest, db: Annotated[Session, Depends(get_db)]):
         effective_date=price_row.effective_date,
         quantity=body.quantity,
         quoted_price=body.quoted_price,
-        nadac_total=nadac_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
-        difference=difference.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
-        markup_percent=markup_percent,
+        nadac_total=compare_numbers["nadac_total"],
+        difference=compare_numbers["difference"],
+        markup_percent=compare_numbers["markup_percent"],
     )

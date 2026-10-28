@@ -1,9 +1,9 @@
 """Pydantic schemas: the shapes of JSON the API accepts and returns."""
 
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class DrugResult(BaseModel):
@@ -37,6 +37,40 @@ class CompareResult(BaseModel):
     effective_date: date
     quantity: Decimal
     quoted_price: Decimal
-    nadac_total: Decimal
-    difference: Decimal
-    markup_percent: Decimal | None
+
+
+class UserCreate(BaseModel):
+    first_name: str
+    last_name: str
+    email: EmailStr
+    password: str = Field(min_length=12, max_length=128)
+
+
+class UserResult(BaseModel):
+    id: int
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    email: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+class QuoteCreate(BaseModel):
+    drug_id: int
+    quantity: Decimal = Field(gt=0, max_digits=10, decimal_places=3)
+    quoted_price: Decimal = Field(ge=0)
+
+
+class QuoteUpdate(BaseModel):
+    quantity: Decimal | None = Field(default=0, gt=0)
+    quoted_price: Decimal | None = Field(default=0, ge=0)
+
+
+class QuoteResult(CompareResult):
+    id: int
+    created_at: datetime
