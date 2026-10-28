@@ -1,25 +1,28 @@
-"""Database models for the NADAC price data.
+"""Database models for the NADAC price data, users and quotes.
 
 ``Drug`` holds facts about a product that do not change with price.
 ``Price`` holds one row each time that product's price changes.
+``User`` holds each user's info.
+``Quote`` holds quotes from the users
+
 
 """
 
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import ForeignKey, Numeric, UniqueConstraint
+from sqlalchemy import ForeignKey, Numeric, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 
 
 # One class per table. Defining a class registers its table in Base.metadata,
-# which is what Base.metadata.create_all(() reads.
+# which is what Base.metadata.create_all() reads.
 class Drug(Base):
     """A product identified by its NDC (National Drug Code).
 
-    Oe row per HDC, however many weekly price lists it appears in
+    One row per NDC, however many weekly price lists it appears in
     """
 
     __tablename__ = "drugs"
@@ -43,17 +46,12 @@ class Price(Base):
 
     __tablename__ = "prices"
     id: Mapped[int] = mapped_column(primary_key=True)
-    drug_id: Mapped[int] = mapped_column(
-        ForeignKey("drugs.id")
-    )  # ForeignKey constraint
+    drug_id: Mapped[int] = mapped_column(ForeignKey("drugs.id"))
     nadac_per_unit: Mapped[Decimal] = mapped_column(Numeric(10, 5))
     effective_date: Mapped[date]
-    # CMS explanation codes for why the rate is what it is. May hold several,
-    # such as "1, 5", so it kept as text.
     explanation_code: Mapped[str]
     # G (generic), B (brand), B-ANDA or B-BIO
     classification: Mapped[str]
-    # Python-side shortcut to the owning drug; not a database column
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
     # using (NDC, effective date) as price's identify
@@ -70,3 +68,26 @@ class Price(Base):
 #     id: Mapped[int] = mapped_column(primary_key=True)
 #     drug_id: Mapped[int] = mapped_column(ForeignKey("drugs.id"))
 #     effective_date: Mapped[date]
+
+
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(unique=True)
+    password_hash: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    quotes: Mapped[list["Quote"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
+
+class Quote(Base):
+    __tablename__ = "quotes"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    drug_id: Mapped[int] = mapped_column(ForeignKey("drugs.id"))
+    quantity: Mapped[Decimal] = mapped_column(Numeric(10, 3))
+    quoted_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    user: Mapped["User"] = relationship(back_populates="quotes")
+    drug: Mapped["Drug"] = relationship()
