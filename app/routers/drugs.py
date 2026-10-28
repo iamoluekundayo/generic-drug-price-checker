@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Drug, Price
-from app.pricing import get_compare_numbers
+from app.pricing import get_compare_numbers, get_latest_price
 from app.schemas import CompareRequest, CompareResult, DrugResult, PriceResult
 
 router = APIRouter(tags=["drugs"])
@@ -63,24 +63,19 @@ def compare(body: CompareRequest, db: Annotated[Session, Depends(get_db)]):
     drug = db.get(Drug, body.drug_id)
     if drug is None:
         raise HTTPException(status_code=404, detail="Drug not found")
-    price_row = db.scalars(
-        select(Price)
-        .where(Price.drug_id == body.drug_id)
-        .order_by(Price.effective_date.desc())
-        .limit(1)
-    ).first()
-    if price_row is None:
-        raise HTTPException(status_code=404, detail="Price not found")
+    price = get_latest_price(db, drug.id)
+    if price is None:
+        raise HTTPException(status_code=404, detail="No price for this drug")
 
     compare_numbers = get_compare_numbers(
-        price_row.nadac_per_unit, body.quantity, body.quoted_price
+        price.nadac_per_unit, body.quantity, body.quoted_price
     )
     return CompareResult(
         drug_id=drug.id,
         ndc_description=drug.ndc_description,
         pricing_unit=drug.pricing_unit,
-        nadac_per_unit=price_row.nadac_per_unit,
-        effective_date=price_row.effective_date,
+        nadac_per_unit=price.nadac_per_unit,
+        effective_date=price.effective_date,
         quantity=body.quantity,
         quoted_price=body.quoted_price,
         nadac_total=compare_numbers["nadac_total"],
