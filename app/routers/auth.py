@@ -13,7 +13,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserResult, status_code=201)
-def create_user(body: UserCreate, db: Annotated[Session, Depends(get_db)]) -> User:
+def register(body: UserCreate, db: Annotated[Session, Depends(get_db)]) -> User:
     user = User(
         first_name=body.first_name,
         last_name=body.last_name,
@@ -25,7 +25,9 @@ def create_user(body: UserCreate, db: Annotated[Session, Depends(get_db)]) -> Us
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=409, detail="Email already registered")
+        raise HTTPException(
+            status_code=409, detail="Email already registered"
+        ) from None
 
     db.refresh(user)
     return user
