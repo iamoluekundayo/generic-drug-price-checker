@@ -1,3 +1,5 @@
+"""HTTP routes for searching drugs, viewing their NADAC price history, and comparing a pharmacy's quoted price against the NADAC benchmark."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -19,6 +21,24 @@ def search_drugs(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
+    """Search drugs by description and return each match with its latest price.
+
+    Matching is a case-insensitive substring search on ``ndc_description``.
+    Results are sorted alphabetically by description and paginated.
+
+    Args:
+        q: Search text (at least 2 characters).
+        db: Database session, injected by FastAPI.
+        page: 1-based page number.
+        page_size: Number of results per page (1-100).
+
+
+    Returns:
+        A list of rows matching ``DrugResult``: The drug's identifying fields plus its most recent ``nadac_per_unit`` and that price's ``effective_date``
+
+    Note:
+        Drugs that have no price rows at all are left out, because the latest-price subquery is joined with an inner join
+    """
     latest_dates = select(Price.drug_id, func.max(Price.effective_date)).group_by(
         Price.drug_id
     )
@@ -49,6 +69,19 @@ def search_drugs(
 
 @router.get("/drugs/{drug_id}/prices", response_model=list[PriceResult])
 def get_price_history(drug_id: int, db: Annotated[Session, Depends(get_db)]):
+    """
+    Args:
+        drug_id: Primary key of the drug.
+        db: Database session, injected by FastAPI.
+
+    Returns:
+        A list of ``(effective_date, nadac_per_unit)`` rows ordered from most recent to oldest. The list is empty if the drug exists but has not prices.
+
+    Raises:
+        HTTPException: 404 if no drug with ``drug_id`` exists.
+    """
+    # Check that the drug exists first, so an unknown id returns 404
+    # instead of an empty list that looks like "no prices yet."
     if db.get(Drug, drug_id) is None:
         raise HTTPException(status_code=404, detail="Drug not found")
     return db.execute(
@@ -60,6 +93,19 @@ def get_price_history(drug_id: int, db: Annotated[Session, Depends(get_db)]):
 
 @router.post("/compare", response_model=CompareResult)
 def compare(body: CompareRequest, db: Annotated[Session, Depends(get_db)]):
+    """Compare a quoted price against the drug's latest NADAC price.
+
+    The NADAC per-unit price is scaled by the requested quantity, and the
+    result is set against the quoted price to show the difference and the
+    markup percentage.
+
+    Args:
+        body:
+
+    Raises:
+        HTTPException: 404 if the drug does not exist, or if it has no
+            price to compare against.
+    """
     drug = db.get(Drug, body.drug_id)
     if drug is None:
         raise HTTPException(status_code=404, detail="Drug not found")
@@ -67,9 +113,11 @@ def compare(body: CompareRequest, db: Annotated[Session, Depends(get_db)]):
     if price is None:
         raise HTTPException(status_code=404, detail="No price for this drug")
 
+    # Returns a dict with "nadac_total", "difference", and "markup_percent".
     compare_numbers = get_compare_numbers(
         price.nadac_per_unit, body.quantity, body.quoted_price
     )
+
     return CompareResult(
         drug_id=drug.id,
         ndc_description=drug.ndc_description,
