@@ -1,3 +1,11 @@
 {
-  "cSpell.words": ["ANDA", "dbaqi", "dotenv", "ilike", "nadac", "sessionmaker"]
+  "cSpell.words": [
+    "ANDA",
+    "dbaqi",
+    "dotenv",
+    "ilike",
+    "nadac",
+    "pwdlib",
+    "sessionmaker"
+  ]
 }
