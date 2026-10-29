@@ -49,8 +49,3 @@ def get_latest_price(db: Session, drug_id: int) -> Price | None:
         .order_by(Price.effective_date.desc())
         .limit(1)
     ).first()
-
-
-# 1) localstore
-# 2) Chart
-# how does one page work compared to several pages?
