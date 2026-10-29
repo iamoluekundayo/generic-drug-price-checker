@@ -6,13 +6,14 @@ before storage and are never returned in a response
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+from app.limiter import limiter
 from app.models import User
 from app.schemas import Token, UserCreate, UserResult
 from app.security import DUMMY_HASH, create_access_token, hash_password, verify_password
@@ -66,9 +67,11 @@ def register(body: UserCreate, db: Annotated[Session, Depends(get_db)]) -> User:
 
 
 @router.post("/login", response_model=Token)
+@limiter.limit("5/minute")
 def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[Session, Depends(get_db)],
+    request: Request,
 ) -> Token:
     """Authenticate a user and issue a JWT access token.
 
