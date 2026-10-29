@@ -25,6 +25,13 @@ def get_compare_numbers(
 
 
 def latest_prices_subquery() -> Subquery:
+    """Return a subquery with each drug's current price.
+
+    One row per drug: the price with the newest effective_date. Columns are
+    ``drug_id``, ``nadac_per_unit`` and ``effective_date``, read as
+    ``.c.drug_id`` and so on. A drug with no prices has no row, so an inner
+    join on this subquery leaves that drug out.
+    """
     latest_dates = select(Price.drug_id, func.max(Price.effective_date)).group_by(
         Price.drug_id
     )
