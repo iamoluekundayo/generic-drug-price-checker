@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -114,13 +114,12 @@ def update_quote(
     return to_quote_result(db, quote)
 
 
-@router.delete("quote/{quote_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{quote_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_quote(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
     quote_id: int,
 ):
-    db.execute(
-        delete(Quote).where(Quote.id == quote_id, Quote.user_id == current_user.id)
-    )
+    quote = get_own_quote(db, quote_id, current_user.id)
+    db.delete(quote)
     db.commit()
