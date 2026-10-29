@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -80,7 +80,7 @@ def get_quotes(
     quote_instances = db.scalars(
         select(Quote)
         .where(Quote.user_id == current_user.id)
-        .order_by(Quote.created_at)
+        .order_by(Quote.created_at.desc(), Quote.id.desc())
         .limit(page_size)
         .offset((page - 1) * page_size)
     ).all()
