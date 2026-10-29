@@ -3,12 +3,12 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select, tuple_
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Drug, Price
-from app.pricing import get_compare_numbers, get_latest_price
+from app.pricing import get_compare_numbers, get_latest_price, latest_prices_subquery
 from app.schemas import CompareRequest, CompareResult, DrugResult, PriceResult
 
 router = APIRouter(tags=["drugs"])
@@ -39,15 +39,8 @@ def search_drugs(
     Note:
         Drugs that have no price rows at all are left out, because the latest-price subquery is joined with an inner join
     """
-    latest_dates = select(Price.drug_id, func.max(Price.effective_date)).group_by(
-        Price.drug_id
-    )
 
-    latest_prices = (
-        select(Price.drug_id, Price.nadac_per_unit, Price.effective_date)
-        .where(tuple_(Price.drug_id, Price.effective_date).in_(latest_dates))
-        .subquery()
-    )
+    latest_prices = latest_prices_subquery
     page_rows = db.execute(
         select(
             Drug.id,

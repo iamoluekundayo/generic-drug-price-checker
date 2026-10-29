@@ -1,6 +1,6 @@
 from decimal import ROUND_HALF_UP, Decimal
 
-from sqlalchemy import select
+from sqlalchemy import Subquery, func, select, tuple_
 from sqlalchemy.orm import Session
 
 from app.models import Price
@@ -24,6 +24,17 @@ def get_compare_numbers(
     }
 
 
+def latest_prices_subquery() -> Subquery:
+    latest_dates = select(Price.drug_id, func.max(Price.effective_date)).group_by(
+        Price.drug_id
+    )
+    return (
+        select(Price.drug_id, Price.nadac_per_unit, Price.effective_date)
+        .where(tuple_(Price.drug_id, Price.effective_date).in_(latest_dates))
+        .subquery()
+    )
+
+
 def get_latest_price(db: Session, drug_id: int) -> Price | None:
     return db.scalars(
         select(Price)
@@ -31,3 +42,8 @@ def get_latest_price(db: Session, drug_id: int) -> Price | None:
         .order_by(Price.effective_date.desc())
         .limit(1)
     ).first()
+
+
+# 1) localstore
+# 2) Chart
+# how does one page work compared to several pages?
