@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app import models  # noqa: F401 (registers every model with Base)
 from app.db import Base, engine
@@ -19,6 +21,7 @@ async def lifespan(app):
 
 app = FastAPI(lifespan=lifespan)
 app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(drugs.router)
 app.include_router(auth.router)
 app.include_router(users.router)
