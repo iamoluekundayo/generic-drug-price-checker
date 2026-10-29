@@ -31,3 +31,7 @@ app.include_router(quotes.router)
 @app.get("/")
 def home():
     return {"status": "ok"}
+
+
+# TODO: Clean missing or dirty values
+# TODO: Set last_seen on each import
