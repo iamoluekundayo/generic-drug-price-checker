@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app import models  # noqa: F401 (registers every model with Base)
 from app.db import Base, engine
+from app.limiter import limiter
 from app.routers import auth, drugs, quotes, users
 
 
@@ -17,6 +18,7 @@ async def lifespan(app):
 
 
 app = FastAPI(lifespan=lifespan)
+app.state.limiter = limiter
 app.include_router(drugs.router)
 app.include_router(auth.router)
 app.include_router(users.router)
