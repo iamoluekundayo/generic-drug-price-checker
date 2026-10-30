@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -28,10 +29,11 @@ app.include_router(users.router)
 app.include_router(quotes.router)
 
 
-@app.get("/")
-def home():
+@app.get("/health")
+def health_check():
     return {"status": "ok"}
 
 
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 # TODO: Clean missing or dirty values
 # TODO: Set last_seen on each import
