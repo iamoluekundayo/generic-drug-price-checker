@@ -1,7 +1,5 @@
 # generic: A Generic Drug Price Checker
 
-## generic-drug-price-checker
-
 ## Description
 
 **generic** is a web app that helps people judge a cash price they were quoted for a prescription drug. You search for a drug, enter quantity and the price the pharmacy quoted, and the app shows how that price compares with what pharmacies themselves pay for the drug. It also charts how that cost has changed over time, and if you created an account, you can save quotes and come back to them later.
