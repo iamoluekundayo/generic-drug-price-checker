@@ -40,7 +40,7 @@ def search_drugs(
         Drugs that have no price rows at all are left out, because the latest-price subquery is joined with an inner join
     """
 
-    latest_prices = latest_prices_subquery
+    latest_prices = latest_prices_subquery()
     page_rows = db.execute(
         select(
             Drug.id,
