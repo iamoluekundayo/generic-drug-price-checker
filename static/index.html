@@ -1,1 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- nav bar:
+     1) App name, link to search, My quotes, Login-->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a
+          class="nav-brand nav-link"
+          href="{{ url_for('static', path='index.html')}}"
+          >generic</a
+        >
+        <button
+          class="navbar-toggle"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#nav"
+          aria-controls="nav"
+          aria-expanded="false"
+          ,
+          aria-label="Toggle navigation"
+        ></button>
+        <div class="collapse navbar-collapse" id="nav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a href="" class="nav-link">search</a></li>
+            <li class="nav-item"><a href="" class="nav-link">My quotes</a></li>
+          </ul>
+        </div>
+        <a id="user">login</a>
+      </div>
+    </nav>
 
+    <search>
+      <form action="/drugs">
+        <input name="q" placeholder="Search" />
+        <button>Go</button>
+      </form>
+    </search>
+
+    <section id="results">
+      <h2>
+        Search Results
+        <ul></ul>
+      </h2>
+    </section>
+
+    <section id="chart"></section>
+
+    <section id="compare">
+      <form action="/compare">
+        <input />
+      </form>
+    </section>
+  </body>
+</html>
