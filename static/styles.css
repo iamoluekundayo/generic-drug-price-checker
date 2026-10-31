@@ -1,3 +1,23 @@
+body {
+  font-family: nunito;
+}
+
 .search-hero {
   min-height: 70vh;
+}
+
+.nav-link {
+  color: #000;
+}
+
+.search-input {
+  line-height: 2rem;
+}
+
+.navbar-toggler:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#greeting {
+  font-size: 32px;
 }
