@@ -10,16 +10,17 @@
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
       crossorigin="anonymous"
     />
+    <link href="/styles.css" rel="stylesheet" />
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
       crossorigin="anonymous"
     ></script>
   </head>
-  <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <body class="d-flex flex-column">
+    <nav class="navbar navbar-expand-lg">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">generic</a>
+        <a class="navbar-brand" href="/">generic</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -32,51 +33,36 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">search</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">My quotes</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Login</a>
+              <a class="nav-link" id="login-link" href="login.html">Login</a>
             </li>
           </ul>
-          <form class="d-flex" role="search">
-            <input
-              class="form-control me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
-            />
-            <button class="btn btn-outline-success" type="submit">
-              Search
-            </button>
-          </form>
         </div>
       </div>
     </nav>
 
-    <search>
-      <form>
-        <input name="q" placeholder="Search" />
-        <button>Go</button>
-      </form>
-    </search>
-
-    <section id="results">
-      <h2></h2>
-      Search Results
-      <ul></ul>
-    </section>
-
-    <section id="chart"><canvas> </canvas></section>
-
-    <section id="compare">
-      <form>
-        <input />
-      </form>
-    </section>
+    <main class="flex-grow-1 d-flex align-items-center search-hero">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-10 col-lg-9">
+            <h1 id="greeting" class="h3 mb-4 text-center">Hi, there</h1>
+            <form id="search-form">
+              <label for="search-input" class="visually-hidden"
+                >Search for a drug</label
+              >
+              <input
+                id="search-input"
+                name="q"
+                class="form-control form-control-lg rounded-pill"
+                placeholder="Search for a generic drug"
+              />
+              <div class="form-text">nadac</div>
+            </form>
+            <a id="nav-quotes" href="/quotes.html" class="d-none">my quotes</a>
+          </div>
+        </div>
+      </div>
+    </main>
   </body>
 </html>
