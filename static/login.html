@@ -43,83 +43,114 @@
       </div>
     </nav>
 
-    <main class="d-flex login-hero">
+    <main>
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-12 col-sm-10 col-md-6 col-lg-4">
             <div>
               <h1 class="h3 mb-4">Log in</h1>
-              <form action="/login" method="post" id="log-in-form">
+              <form method="post" id="login-form">
                 <div class="mb-3">
-                  <label for="email" class="form-label">email</label>
+                  <label for="login-email" class="form-label">Email</label>
                   <input
-                    id="email"
+                    id="login-email"
                     name="email"
                     type="email"
+                    required
+                    autocomplete="email"
                     class="form-control"
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="password" class="form-label">password</label>
+                  <label for="login-password" class="form-label"
+                    >Password</label
+                  >
                   <input
-                    id="password"
+                    id="login-password"
                     name="password"
                     required
-                    minlength="12"
                     type="password"
+                    autocomplete="current-password"
                     class="form-control"
                   />
                 </div>
+                <div
+                  id="login-error"
+                  class="alert alert-danger d-none"
+                  role="alert"
+                ></div>
                 <button type="submit" class="btn btn-primary w-100">
                   Log in
                 </button>
               </form>
             </div>
 
-            <div>
-              <h1 class="h3 mb-4">Register</h1>
-              <form action="/register" method="post" id="register-form">
+            <div class="mt-5">
+              <h2 class="h3 mb-4">Register</h2>
+              <form method="post" id="register-form">
                 <div class="mb-3">
-                  <label for="first-name" class="form-label">First name</label>
+                  <label for="register-first-name" class="form-label"
+                    >First name</label
+                  >
                   <input
-                    id="first-name"
+                    id="register-first-name"
                     name="first-name"
+                    minlength="1"
+                    maxlength="100"
+                    required
                     type="text"
                     class="form-control"
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="last-name" class="form-label">Last name</label>
+                  <label for="register-last-name" class="form-label"
+                    >Last name</label
+                  >
                   <input
-                    id="last-name"
+                    id="register-last-name"
                     name="last-name"
+                    minlength="1"
+                    maxlength="100"
+                    required
                     type="text"
                     class="form-control"
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="email" class="form-label">email</label>
+                  <label for="register-email" class="form-label">Email</label>
                   <input
-                    id="email"
+                    id="register-email"
                     name="email"
                     type="email"
+                    required
+                    autocomplete="email"
                     class="form-control"
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="password" class="form-label">password</label>
+                  <label for="register-password" class="form-label"
+                    >Password</label
+                  >
                   <input
-                    id="password"
+                    id="register-password"
                     name="password"
                     required
                     minlength="12"
+                    maxlength="128"
                     type="password"
+                    autocomplete="new-password"
                     class="form-control"
+                    aria-describedby="register-password-help"
                   />
-                  <div id="password-help" class="form-text">
+                  <div id="register-password-help" class="form-text">
                     At least 12 characters.
                   </div>
                 </div>
+                <div
+                  id="register-error"
+                  class="alert alert-danger d-none"
+                  role="alert"
+                ></div>
                 <button type="submit" class="btn btn-primary w-100">
                   Register
                 </button>
@@ -129,13 +160,12 @@
         </div>
       </div>
     </main>
-
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
       crossorigin="anonymous"
     ></script>
     <script src="/api.js"></script>
-    <script src="/search.js"></script>
+    <script src="/auth.js"></script>
   </body>
 </html>
