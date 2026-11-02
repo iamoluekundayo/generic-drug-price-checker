@@ -1,16 +1,44 @@
 // Token helpers, three functions to save, read, and clear the token
 
+/**
+ * Save the login token
+ * @param {string} token - The JWT returned by the login endpoint.
+ */
 function saveToken(token) {
   localStorage.setItem("token", token);
 }
+
+/**
+ * Get the saved login token.
+ * @returns {string | null} The token, or null if the user isn't logged in.
+ */
 function getToken() {
   return localStorage.getItem("token");
 }
+
+/**
+ * Remove the saved login token (log out).
+ */
 function clearToken() {
   localStorage.removeItem("token");
 }
 
+/**
+ * Send a request to the backend and return the parsed JSON response.
+ *
+ * Adds the login token if there is one, and JSON-encodes the body unless
+ * it's URLSearchParams (form data)
+ *
+ * @param {string} path - The API path, e.g. "/api/search?q=ibuprofen".
+ * @param {RequestInit & {body?: object | URLSearchParams}} [options={}] -
+ *  Fetch options. `body` can be a plain object (sent as JSON) or
+ * URLSearchParams (sent as a form)
+ * @returns {Promise<any | null>} The response data, or null for 204 No content.
+ * @throws {Error} If the server can't be reached, or responds with an error.
+ *
+ */
 async function api(path, options = {}) {
+  // Copy the headers so the caller's options object isn't changed.
   const headers = { ...(options.headers || {}) };
   const token = getToken();
   if (token) {
@@ -46,7 +74,9 @@ async function api(path, options = {}) {
     let errorData = {};
     try {
       errorData = await response.json();
-    } catch (err) {} // not JSON; errorMessage falls back
+    } catch {
+      // not JSON; errorMessage falls back
+    }
 
     const error = new Error(errorMessage(errorData));
     error.status = statusCode;
@@ -56,6 +86,15 @@ async function api(path, options = {}) {
   return data;
 }
 
+/**
+ * Turn an error response body into a message the user can read.
+ *
+ * Handles FastAPI's formats: `detail` is a string for HTTPException,
+ * a list of `{msg, ...}` objects for validation errors.
+ *
+ * @param {object} data - The parsed JSON error body (may be empty).
+ * @returns {string} A readable error message
+ */
 function errorMessage(data) {
   if (typeof data.detail === "string") {
     return data.detail;
