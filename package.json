@@ -1,0 +1,26 @@
+{
+  "name": "generic-drug-price-checker",
+  "version": "1.0.0",
+  "description": "**generic** is a web app that helps people judge a cash price they were quoted for a prescription drug. You search for a drug, enter quantity and the price the pharmacy quoted, and the app shows how that price compares with what pharmacies themselves pay for the drug. It also charts how that cost has changed over time, and if you created an account, you can save quotes and come back to them later.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamoluekundayo/generic-drug-price-checker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/iamoluekundayo/generic-drug-price-checker/issues"
+  },
+  "homepage": "https://github.com/iamoluekundayo/generic-drug-price-checker#readme",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "globals": "^17.13.0"
+  }
+}
