@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>generic</title>
+    <title>my quotes</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -15,7 +15,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
-      rel="stylesheet"/>
+      rel="stylesheet"
+    />
   </head>
   <body class="px-3">
     <nav class="navbar navbar-expand-lg">
@@ -35,15 +36,26 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link" id="login-link" href="/login.html">Login</a>
+              <a class="nav-link" id="nav-login" href="/login.html">Login</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
 
-    <main class="d-flex align-items-center search-hero">
-      
+    <main>
+      <div class="container">
+        <h1 class="h3 my-5">My quotes</h1>
+        <p class="d-none text-muted" id="quotes-empty">
+          No quotes yet.<a href="/">Search for a drug</a> to compare a price and
+          save it.
+        </p>
+        <div
+          id="quotes-error"
+          class="alert alert-danger d-none"
+          role="alert"
+        ></div>
+        <ul id="quotes-list"></ul>
       </div>
     </main>
 
@@ -53,6 +65,6 @@
       crossorigin="anonymous"
     ></script>
     <script src="/api.js"></script>
-    <script src="/search.js"></script>
+    <script src="/quotes.js"></script>
   </body>
 </html>
