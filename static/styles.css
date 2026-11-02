@@ -11,12 +11,12 @@ body {
   color: #000;
 }
 
-#search-input {
-  line-height: 2rem;
-}
-
 .navbar-toggler:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+#search-input {
+  border: 1.5px solid #dee2e6;
 }
 
 #search-input:focus {
