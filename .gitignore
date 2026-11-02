@@ -230,3 +230,4 @@ data/
 #VS Code
 .vscode/settings.json
 
+node_modules/
