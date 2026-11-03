@@ -107,3 +107,32 @@ function errorMessage(data) {
   }
   return "Something went wrong";
 }
+
+async function updateNav() {
+  const navLogin = document.getElementById("nav-login");
+  const navLogout = document.getElementById("nav-logout");
+  const greeting = document.getElementById("greeting");
+  const quotes = document.getElementById("search-quotes");
+
+  const token = getToken();
+  if (token) {
+    try {
+      const userInfo = await api("/users/me");
+      navLogout.addEventListener("click", () => {
+        clearToken();
+        window.location.href = "/";
+      });
+      navLogout.classList.remove("d-none");
+      navLogin.classList.add("d-none");
+      if (greeting) {
+        firstName = userInfo.first_name;
+        greeting.textContent =
+          "Hi, " + firstName.charAt(0).toUpperCase() + firstName.slice(1);
+      }
+      if (quotes) {
+        quotes.classList.remove("d-none");
+      }
+    } catch (err) {}
+  }
+}
+updateNav();
