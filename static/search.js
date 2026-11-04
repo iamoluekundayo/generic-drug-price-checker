@@ -11,8 +11,8 @@ let searchText = "";
 let currentPage = 1;
 
 async function loadPage() {
-  searchPrevious.classList.add("disabled");
-  searchNext.classList.add("disabled");
+  searchPrevious.disabled = true;
+  searchNext.disabled = true;
   searchMessage.classList.remove("d-none");
   searchMessage.textContent = "Loading...";
   const params = new URLSearchParams({
@@ -25,22 +25,22 @@ async function loadPage() {
   try {
     drugs = await api("/drugs?" + params);
     searchMessage.classList.add("d-none");
-    renderDrug(drugs);
+    renderDrugs(drugs);
   } catch (err) {
     searchMessage.textContent = err.message;
     return;
   }
   if (currentPage > 1) {
-    searchPrevious.classList.remove("disabled");
+    searchPrevious.disabled = false;
   }
   if (drugs.length === PAGE_SIZE) {
-    searchNext.classList.remove("disabled");
+    searchNext.disabled = false;
   }
 }
 
 function renderDrugs(drugs) {
   if (drugs.length == 0) {
-    searchMessage.classList.remove("disabled");
+    searchMessage.classList.remove("d-none");
     searchMessage.textContent = "No drugs match";
   }
   searchResultList.replaceChildren();
@@ -63,13 +63,14 @@ searchForm.addEventListener("submit", (event) => {
   searchResultList.replaceChildren();
   currentPage = 1;
   event.preventDefault();
-  searchText = searchInput.value.trim();
-  if (searchText.length < 2) {
+  uncheckedSearchText = searchInput.value.trim();
+  if (uncheckedSearchText.length < 2) {
     searchMessage.classList.remove("d-none");
     searchResult.classList.remove("d-none");
     searchMessage.textContent = "Drug name must be at least 2 characters";
     return;
   }
+  searchText = uncheckedSearchText;
   searchResult.classList.remove("d-none");
   loadPage();
 });
