@@ -38,7 +38,7 @@ async function loadPage() {
   }
 }
 
-function renderDrug(drugs) {
+function renderDrugs(drugs) {
   if (drugs.length == 0) {
     searchMessage.classList.remove("disabled");
     searchMessage.textContent = "No drugs match";
