@@ -7,12 +7,20 @@ const searchPrevious = document.getElementById("search-previous");
 const searchNext = document.getElementById("search-next");
 
 let currentPage;
+let currentPageResult;
+let nextPageResult;
 let maxPage;
 let matches;
 let searchText;
 let params;
 
 async function getDrugs({ pageNum = currentPage } = {}) {
+  if (pageNum < 1) {
+    pageNum = 1;
+  }
+  if (maxPage !== undefined && currentPage > maxPage) {
+    pageNum = maxPage;
+  }
   params = new URLSearchParams({
     q: searchText,
     page: pageNum,
@@ -31,9 +39,12 @@ function displayDrug() {
   for (let drug of matches) {
     const item = document.createElement("button");
     item.className = "list-group-item list-group-item-action";
-    item.textContent = `${drug.ndc_description} 
+    item.textContent = `
+    ${drug.ndc}
+    ${drug.ndc_description} 
           ${drug.pricing_unit} 
           $${drug.nadac_per_unit} 
+          ${drug.effective_date}
           ${drug.last_seen_date}`;
     searchResultList.append(item);
   }
@@ -44,6 +55,11 @@ searchForm.addEventListener("submit", async (event) => {
   currentPage = 1;
   searchPrevious.classList.add("disabled");
   searchText = searchInput.value.trim();
+  nextPageResult = await getDrugs({ pageNum: currentPage + 1 });
+  if (nextPageResult.length == 0) {
+    searchNext.classList.add("disabled");
+    maxPage = currentPage;
+  }
 
   if (searchText.length < 2) {
     searchMessage.classList.remove("d-none");
@@ -74,18 +90,16 @@ searchPrevious.addEventListener("click", async () => {
 // next button
 searchNext.addEventListener("click", async () => {
   currentPage++;
-  const nextPage = await getDrugs({ pageNum: currentPage + 1 });
-  console.log("nextPage");
-  console.log(nextPage.length);
-  console.log(nextPage);
-  if (nextPage.length == 0) {
-    searchNext.classList.add("disabled");
-    maxPage = currentPage;
-  }
+
   if (currentPage >= 2) {
     searchPrevious.classList.remove("disabled");
   }
   matches = await getDrugs({ pageNum: currentPage });
+  nextPageResult = await getDrugs({ pageNum: currentPage + 1 });
+  if (nextPageResult.length == 0) {
+    searchNext.classList.add("disabled");
+    maxPage = currentPage;
+  }
   displayDrug();
 });
 
