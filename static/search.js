@@ -1,3 +1,5 @@
+"use strict";
+
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
 const searchResult = document.getElementById("search-result");

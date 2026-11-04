@@ -1,3 +1,4 @@
+"use strict";
 // Token helpers, three functions to save, read, and clear the token
 
 /**
