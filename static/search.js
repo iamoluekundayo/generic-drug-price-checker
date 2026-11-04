@@ -39,6 +39,10 @@ async function loadPage() {
 }
 
 function renderDrug(drugs) {
+  if (drugs.length == 0) {
+    searchMessage.classList.remove("disabled");
+    searchMessage.textContent = "No drugs match";
+  }
   searchResultList.replaceChildren();
   for (const drug of drugs) {
     const item = document.createElement("button");
