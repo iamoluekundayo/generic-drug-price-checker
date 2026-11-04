@@ -69,10 +69,9 @@ searchForm.addEventListener("submit", (event) => {
     searchResult.classList.remove("d-none");
     searchMessage.textContent = "Drug name must be at least 2 characters";
     return;
-  } else {
-    searchResult.classList.remove("d-none");
-    loadPage();
   }
+  searchResult.classList.remove("d-none");
+  loadPage();
 });
 
 // previous button
