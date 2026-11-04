@@ -61,6 +61,7 @@ function renderDrug(drugs) {
 }
 
 searchForm.addEventListener("submit", async (event) => {
+  searchResultList.replaceChildren();
   currentPage = 1;
   event.preventDefault();
   searchText = searchInput.value.trim();
