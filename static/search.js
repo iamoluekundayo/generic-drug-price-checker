@@ -13,9 +13,9 @@ let currentPage = 1;
 async function loadPage() {
   searchPrevious.classList.add("disabled");
   searchNext.classList.add("disabled");
+  searchMessage.classList.remove("d-none");
   searchMessage.textContent = "Loading...";
-
-  params = new URLSearchParams({
+  const params = new URLSearchParams({
     q: searchText,
     page: currentPage,
     page_size: PAGE_SIZE,
@@ -24,6 +24,7 @@ async function loadPage() {
   let drugs;
   try {
     drugs = await api("/drugs?" + params);
+    searchMessage.classList.add("d-none");
     renderDrug(drugs);
   } catch (err) {
     searchMessage.textContent = err.message;
