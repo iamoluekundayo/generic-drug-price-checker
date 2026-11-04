@@ -28,6 +28,7 @@ async function loadPage() {
     renderDrug(drugs);
   } catch (err) {
     searchMessage.textContent = err.message;
+    return;
   }
   if (currentPage > 1) {
     searchPrevious.classList.remove("disabled");
