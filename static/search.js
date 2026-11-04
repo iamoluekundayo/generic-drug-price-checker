@@ -53,8 +53,7 @@ function renderDrug(drugs) {
 
     const details = document.createElement("small");
     details.className = "text-muted";
-    details.textContent = ` ${drug.ndc},${drug.ndc_description}, ${drug.pricing_unit}, $${drug.nadac_per_unit}, ${drug.effective_date}, ${drug.last_seen_date}`;
-
+    details.textContent = ` NDC ${drug.ndc} · $${drug.nadac_per_unit} per ${drug.pricing_unit} · as of ${drug.effective_date}`;
     item.append(name, details);
     searchResultList.append(item);
   }
