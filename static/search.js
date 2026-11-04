@@ -39,7 +39,7 @@ async function loadPage() {
 }
 
 function renderDrugs(drugs) {
-  if (drugs.length == 0) {
+  if (drugs.length === 0) {
     searchMessage.classList.remove("d-none");
     searchMessage.textContent = "No drugs match";
   }
@@ -61,13 +61,16 @@ function renderDrugs(drugs) {
 
 searchForm.addEventListener("submit", (event) => {
   searchResultList.replaceChildren();
+
   currentPage = 1;
   event.preventDefault();
-  uncheckedSearchText = searchInput.value.trim();
+  const uncheckedSearchText = searchInput.value.trim();
   if (uncheckedSearchText.length < 2) {
     searchMessage.classList.remove("d-none");
     searchResult.classList.remove("d-none");
     searchMessage.textContent = "Drug name must be at least 2 characters";
+    searchPrevious.disabled = true;
+    searchNext.disabled = true;
     return;
   }
   searchText = uncheckedSearchText;
