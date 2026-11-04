@@ -59,7 +59,7 @@ function renderDrug(drugs) {
   }
 }
 
-searchForm.addEventListener("submit", async (event) => {
+searchForm.addEventListener("submit", (event) => {
   searchResultList.replaceChildren();
   currentPage = 1;
   event.preventDefault();
@@ -76,13 +76,13 @@ searchForm.addEventListener("submit", async (event) => {
 });
 
 // previous button
-searchPrevious.addEventListener("click", async () => {
+searchPrevious.addEventListener("click", () => {
   currentPage--;
   loadPage();
 });
 
 // next button
-searchNext.addEventListener("click", async () => {
+searchNext.addEventListener("click", () => {
   currentPage++;
   loadPage();
 });
