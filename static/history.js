@@ -4,7 +4,7 @@
 // drug is selected from home page's search result
 // new drug is selected
 
-const history = document.getElementById("history");
+const historySection = document.getElementById("history");
 const historyMessage = document.getElementById("history-message");
 const historyCanvas = document.getElementById("history-canvas");
 
