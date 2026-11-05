@@ -87,11 +87,41 @@
           <div id="search-message" class="d-none"></div>
         </section>
         <section id="history-section" class="d-none">
-          <h1 id="history-drug-name"></h1>
+          <h1 id="history-drug-name" class="h3"></h1>
           <div id="history-message"></div>
           <canvas id="history-canvas"></canvas>
         </section>
-        <section id="compare-drugs" class="d-none"></section>
+        <section id="compare-section" class="d-none">
+          <h1 id="compare-drug-name" class="h3"></h1>
+          <form action="compare-form">
+            <label for="compare-form-quantity"
+              >quantity(<span id="compare-form-unit"></span>):
+            </label>
+            <input
+              id="compare-form-quantity"
+              type="number"
+              min="0.001"
+              step="0.001"
+              inputmode="decimal"
+            />
+            <label for="compare-form-quoted-price">Quote Price: </label>
+            <input
+              id="compare-form-quoted-price"
+              type="number"
+              min="0"
+              step="0.01"
+              inputmode="decimal"
+            />
+            <button
+              id="compare-form-submit"
+              type="submit"
+              class="btn btn-primary"
+            >
+              Compare
+            </button>
+          </form>
+          <div id="compare-result"></div>
+        </section>
       </div>
     </main>
 
