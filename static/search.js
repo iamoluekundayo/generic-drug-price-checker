@@ -57,6 +57,12 @@ function renderDrugs(drugs) {
     details.className = "text-muted";
     details.textContent = ` NDC ${drug.ndc} · $${drug.nadac_per_unit} per ${drug.pricing_unit} · as of ${drug.effective_date}`;
     item.append(name, details);
+
+    item.addEventListener("click", () => {
+      document.dispatchEvent(
+        new CustomEvent("drug-selected", { detail: drug }),
+      );
+    });
     searchResultList.append(item);
   }
 }
