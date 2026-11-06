@@ -42,14 +42,19 @@ document.addEventListener("drug-selected", (event) => {
       return;
     }
 
-    const compareResult = await api("/compare", {
-      method: "POST",
-      body: {
-        drug_id: compareDrug.id,
-        quantity: quantity,
-        quoted_price: quotedPrice,
-      },
-    });
+    let compareResult;
+    try {
+      compareResult = await api("/compare", {
+        method: "POST",
+        body: {
+          drug_id: compareDrug.id,
+          quantity: quantity,
+          quoted_price: quotedPrice,
+        },
+      });
+    } catch (err) {
+      compareMessage.textContent = err.message;
+    }
 
     const nadacPrice = document.createElement("p");
     nadacPrice.textContent = `Nadac price: ${compareResult.nadac_per_unit}`;
