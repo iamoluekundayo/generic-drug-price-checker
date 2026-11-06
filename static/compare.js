@@ -9,6 +9,7 @@ const compareSection = document.getElementById("compare-section");
 const compareDrugName = document.getElementById("compare-drug-name");
 const compareResultDisplay = document.getElementById("compare-result-display");
 const compareFormQuantity = document.getElementById("compare-form-quantity");
+const compareFormUnit = document.getElementById("compare-form-unit");
 const compareFormQuotedPrice = document.getElementById(
   "compare-form-quoted-price",
 );
@@ -19,8 +20,9 @@ document.addEventListener("drug-selected", (event) => {
   drug = event.detail;
   compareMessage.textContent = "";
   compareResultDisplay.replaceChildren();
-  compareSection.classList.remove("d-none");
   compareDrugName.textContent = drug.ndc_description;
+  compareFormUnit.textContent = drug.pricing_unit;
+  compareSection.classList.remove("d-none");
 
   const compareResult = compareFormSubmit.addEventListener(
     "submit",
