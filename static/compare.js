@@ -5,7 +5,10 @@
 // result (show computed result)
 // new drug selected (clear and hide result)
 
+"use script";
+
 const compareSection = document.getElementById("compare-section");
+const compareForm = document.getElementById("compare-form");
 const compareDrugName = document.getElementById("compare-drug-name");
 const compareResultDisplay = document.getElementById("compare-result-display");
 const compareFormQuantity = document.getElementById("compare-form-quantity");
@@ -16,55 +19,55 @@ const compareFormQuotedPrice = document.getElementById(
 const compareFormSubmit = document.getElementById("compare-form-submit");
 const compareMessage = document.getElementById("compare-message");
 
+let compareDrug = null;
+
 document.addEventListener("drug-selected", (event) => {
-  drug = event.detail;
+  compareDrug = event.detail;
   compareMessage.textContent = "";
   compareResultDisplay.replaceChildren();
-  compareDrugName.textContent = drug.ndc_description;
-  compareFormUnit.textContent = drug.pricing_unit;
+  compareDrugName.textContent = compareDrug.ndc_description;
+  compareFormUnit.textContent = compareDrug.pricing_unit;
   compareSection.classList.remove("d-none");
 
-  const compareResult = compareFormSubmit.addEventListener(
-    "submit",
-    async () => {
-      quantity = compareFormQuantity.value;
-      quotedPrice = compareFormQuotedPrice.value;
-      if (quantity <= 0) {
-        compareMessage.textContent = "Quantity should be greater than 0";
-        return;
-      }
-      if (quotedPrice < 0) {
-        compareMessage.textContent = "Quoted price should be at least 0";
-        return;
-      }
+  compareForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const quantity = compareFormQuantity.value;
+    const quotedPrice = compareFormQuotedPrice.value;
+    if (quantity <= 0) {
+      compareMessage.textContent = "Quantity should be greater than 0";
+      return;
+    }
+    if (quotedPrice < 0) {
+      compareMessage.textContent = "Quoted price should be at least 0";
+      return;
+    }
 
-      const compareResult = await api("/compare", {
-        method: "POST",
-        body: {
-          drug_id: drug.id,
-          quantity: quantity,
-          quoted_price: quotedPrice,
-        },
-      });
+    const compareResult = await api("/compare", {
+      method: "POST",
+      body: {
+        drug_id: compareDrug.id,
+        quantity: quantity,
+        quoted_price: quotedPrice,
+      },
+    });
 
-      const nadacPrice = document.createElement("p");
-      nadacPrice.textContent = `Nadac price: ${compareResult.nadac_per_unit}`;
-      const nadacTotal = document.createElement("p");
-      nadacTotal.textContent = `Nadac total: ${compareResult.nadac_total}`;
-      const effectiveDate = document.createElement("p");
-      effectiveDate.textContent = `Effective date: ${compareResult.effective_date}`;
-      const difference = document.createElement("p");
-      difference.textContent = `Difference: ${compareResult.difference}`;
-      const markupPercent = document.createElement("p");
-      markupPercent.textContent = `Difference: ${compareResult.markup_percent}`;
+    const nadacPrice = document.createElement("p");
+    nadacPrice.textContent = `Nadac price: ${compareResult.nadac_per_unit}`;
+    const nadacTotal = document.createElement("p");
+    nadacTotal.textContent = `Nadac total: ${compareResult.nadac_total}`;
+    const effectiveDate = document.createElement("p");
+    effectiveDate.textContent = `Effective date: ${compareResult.effective_date}`;
+    const difference = document.createElement("p");
+    difference.textContent = `Difference: ${compareResult.difference}`;
+    const markupPercent = document.createElement("p");
+    markupPercent.textContent = `Difference: ${compareResult.markup_percent}`;
 
-      compareResultDisplay.append(
-        nadacPrice,
-        nadacTotal,
-        effectiveDate,
-        difference,
-        markupPercent,
-      );
-    },
-  );
+    compareResultDisplay.append(
+      nadacPrice,
+      nadacTotal,
+      effectiveDate,
+      difference,
+      markupPercent,
+    );
+  });
 });
