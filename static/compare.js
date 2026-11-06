@@ -23,8 +23,6 @@ let compareDrug = null;
 
 document.addEventListener("drug-selected", (event) => {
   compareDrug = event.detail;
-  compareMessage.textContent = "";
-  compareResultDisplay.replaceChildren();
   compareDrugName.textContent = compareDrug.ndc_description;
   compareFormUnit.textContent = compareDrug.pricing_unit;
   compareSection.classList.remove("d-none");
@@ -32,6 +30,8 @@ document.addEventListener("drug-selected", (event) => {
 
 compareForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  compareMessage.textContent = "";
+  compareResultDisplay.replaceChildren();
   const quantity = compareFormQuantity.value;
   const quotedPrice = compareFormQuotedPrice.value;
   if (quantity <= 0) {
