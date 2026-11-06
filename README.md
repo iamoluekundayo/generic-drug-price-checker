@@ -14,6 +14,12 @@ The second number does exist. CMS, the federal agency that runs Medicaid, publis
 
 ## Features
 
+- **Drug search:** search by name, for example "lisinopril", with a paginated results showing each drug's NDC, pricing unit, and current NADAC price and date.
+- **Price history:** Clicking a drug draws constructs and display a line chart of the drug's NADAC price
+- **Quote comparison:** enter a quantity and a quoted price to see the NADAC total, the difference and the markup percentage.
+- **Accounts:** register, log in and log out.
+- **Saved quotes:** logged-in users can save comparisons, list them, edit them, and delete them. Each saved quote is recalculated against current NADAC price whenever it is viewed.
+
 ## How it works
 
 ## API endpoints
