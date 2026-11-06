@@ -28,52 +28,52 @@ document.addEventListener("drug-selected", (event) => {
   compareDrugName.textContent = compareDrug.ndc_description;
   compareFormUnit.textContent = compareDrug.pricing_unit;
   compareSection.classList.remove("d-none");
+});
 
-  compareForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const quantity = compareFormQuantity.value;
-    const quotedPrice = compareFormQuotedPrice.value;
-    if (quantity <= 0) {
-      compareMessage.textContent = "Quantity should be greater than 0";
-      return;
-    }
-    if (quotedPrice < 0) {
-      compareMessage.textContent = "Quoted price should be at least 0";
-      return;
-    }
+compareForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const quantity = compareFormQuantity.value;
+  const quotedPrice = compareFormQuotedPrice.value;
+  if (quantity <= 0) {
+    compareMessage.textContent = "Quantity should be greater than 0";
+    return;
+  }
+  if (quotedPrice < 0) {
+    compareMessage.textContent = "Quoted price should be at least 0";
+    return;
+  }
 
-    let compareResult;
-    try {
-      compareResult = await api("/compare", {
-        method: "POST",
-        body: {
-          drug_id: compareDrug.id,
-          quantity: quantity,
-          quoted_price: quotedPrice,
-        },
-      });
-    } catch (err) {
-      compareMessage.textContent = err.message;
-      return;
-    }
+  let compareResult;
+  try {
+    compareResult = await api("/compare", {
+      method: "POST",
+      body: {
+        drug_id: compareDrug.id,
+        quantity: quantity,
+        quoted_price: quotedPrice,
+      },
+    });
+  } catch (err) {
+    compareMessage.textContent = err.message;
+    return;
+  }
 
-    const nadacPrice = document.createElement("p");
-    nadacPrice.textContent = `Nadac price: ${compareResult.nadac_per_unit}`;
-    const nadacTotal = document.createElement("p");
-    nadacTotal.textContent = `Nadac total: ${compareResult.nadac_total}`;
-    const effectiveDate = document.createElement("p");
-    effectiveDate.textContent = `Effective date: ${compareResult.effective_date}`;
-    const difference = document.createElement("p");
-    difference.textContent = `Difference: ${compareResult.difference}`;
-    const markupPercent = document.createElement("p");
-    markupPercent.textContent = `Markup: ${compareResult.markup_percent}`;
+  const nadacPrice = document.createElement("p");
+  nadacPrice.textContent = `Nadac price: ${compareResult.nadac_per_unit}`;
+  const nadacTotal = document.createElement("p");
+  nadacTotal.textContent = `Nadac total: ${compareResult.nadac_total}`;
+  const effectiveDate = document.createElement("p");
+  effectiveDate.textContent = `Effective date: ${compareResult.effective_date}`;
+  const difference = document.createElement("p");
+  difference.textContent = `Difference: ${compareResult.difference}`;
+  const markupPercent = document.createElement("p");
+  markupPercent.textContent = `Markup: ${compareResult.markup_percent}`;
 
-    compareResultDisplay.append(
-      nadacPrice,
-      nadacTotal,
-      effectiveDate,
-      difference,
-      markupPercent,
-    );
-  });
+  compareResultDisplay.append(
+    nadacPrice,
+    nadacTotal,
+    effectiveDate,
+    difference,
+    markupPercent,
+  );
 });
