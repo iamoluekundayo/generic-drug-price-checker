@@ -66,7 +66,7 @@ document.addEventListener("drug-selected", (event) => {
     const difference = document.createElement("p");
     difference.textContent = `Difference: ${compareResult.difference}`;
     const markupPercent = document.createElement("p");
-    markupPercent.textContent = `Difference: ${compareResult.markup_percent}`;
+    markupPercent.textContent = `Markup: ${compareResult.markup_percent}`;
 
     compareResultDisplay.append(
       nadacPrice,
