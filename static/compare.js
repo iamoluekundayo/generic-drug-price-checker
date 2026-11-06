@@ -54,6 +54,7 @@ document.addEventListener("drug-selected", (event) => {
       });
     } catch (err) {
       compareMessage.textContent = err.message;
+      return;
     }
 
     const nadacPrice = document.createElement("p");
