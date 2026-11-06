@@ -126,7 +126,7 @@ async function updateNav() {
       navLogout.classList.remove("d-none");
       navLogin.classList.add("d-none");
       if (greeting) {
-        firstName = userInfo.first_name;
+        const firstName = userInfo.first_name;
         greeting.textContent =
           "Hi, " + firstName.charAt(0).toUpperCase() + firstName.slice(1);
       }

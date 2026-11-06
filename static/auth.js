@@ -1,5 +1,3 @@
-//ready: , sending: , error: , success:
-
 "use strict";
 
 async function login(email, password) {
