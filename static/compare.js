@@ -19,21 +19,40 @@ const compareFormQuotedPrice = document.getElementById(
 const compareFormSubmit = document.getElementById("compare-form-submit");
 const compareMessage = document.getElementById("compare-message");
 
+const compareSaveButton = document.getElementById("compare-save-button");
+const compareSaveLogin = document.getElementById("compare-save-login");
+const compareSaveMessage = document.getElementById("compare-save-message");
+const compareSaveConfirm = document.getElementById("compare-save-confirm");
+
 let compareDrug = null;
+let compareResult = null;
+
+function resetSave() {
+  compareSaveButton.classList.add("d-none");
+  compareSaveButton.textContent = "save";
+  compareSaveButton.disabled = false;
+  compareSaveLogin.classList.add("d-none");
+  compareSaveMessage.classList.add("d-none");
+  compareSaveConfirm.classList.add("d-none");
+}
 
 document.addEventListener("drug-selected", (event) => {
   compareDrug = event.detail;
+  compareResult = null;
   compareDrugName.textContent = compareDrug.ndc_description;
   compareFormUnit.textContent = compareDrug.pricing_unit;
   compareResultDisplay.replaceChildren();
   compareMessage.textContent = "";
   compareSection.classList.remove("d-none");
+  resetSave();
 });
 
 compareForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   compareMessage.textContent = "";
+  compareResult = null;
   compareResultDisplay.replaceChildren();
+  resetSave();
   const quantity = compareFormQuantity.value;
   const quotedPrice = compareFormQuotedPrice.value;
   if (Number(quantity) <= 0) {
@@ -45,7 +64,6 @@ compareForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  let compareResult;
   compareMessage.textContent = "Loading...";
   try {
     compareFormSubmit.disabled = true;
@@ -87,4 +105,38 @@ compareForm.addEventListener("submit", async (event) => {
     effectiveDate,
     difference,
   );
+
+  if (getToken()) {
+    compareSaveButton.classList.remove("d-none");
+  } else {
+    compareSaveLogin.classList.remove("d-none");
+  }
+});
+
+compareSaveButton.addEventListener("click", async () => {
+  compareSaveButton.disabled = true;
+  compareSaveButton.textContent = "saving";
+  try {
+    await api("/quotes", {
+      method: "POST",
+      body: {
+        drug_id: compareResult.drug_id,
+        quantity: compareResult.quantity,
+        quoted_price: compareResult.quoted_price,
+      },
+    });
+  } catch (err) {
+    if (err.status === 401) {
+      compareSaveButton.classList.add("d-none");
+      compareSaveLogin.classList.remove("d-none");
+    } else {
+      compareSaveMessage.classList.remove("d-none");
+      compareSaveMessage.textContent = err.message;
+      compareSaveButton.disabled = false;
+      compareSaveButton.textContent = "save";
+    }
+    return;
+  }
+  compareSaveButton.textContent = "saved";
+  compareSaveConfirm.classList.remove("d-none");
 });
