@@ -2,8 +2,18 @@
 
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field
+
+
+def not_in_future(value: date) -> date:
+    if value > date.today():
+        raise ValueError("Quote date can't be in the future")
+    return value
+
+
+QuoteDate = Annotated[date, AfterValidator(not_in_future)]
 
 
 class DrugResult(BaseModel):
@@ -25,8 +35,9 @@ class PriceResult(BaseModel):
 
 class CompareRequest(BaseModel):
     drug_id: int
-    quantity: Decimal = Field(gt=0)
-    quoted_price: Decimal = Field(ge=0)
+    quantity: Decimal = Field(gt=0, decimal_places=3, max_digits=10)
+    quoted_price: Decimal = Field(ge=0, decimal_places=2, max_digits=10)
+    quote_date: QuoteDate | None = None
 
 
 class CompareResult(BaseModel):
@@ -40,6 +51,7 @@ class CompareResult(BaseModel):
     nadac_total: Decimal
     difference: Decimal
     markup_percent: Decimal | None
+    quote_date: date
 
 
 class UserCreate(BaseModel):
@@ -67,6 +79,7 @@ class QuoteCreate(BaseModel):
     drug_id: int
     quantity: Decimal = Field(gt=0, decimal_places=3, max_digits=10)
     quoted_price: Decimal = Field(ge=0, decimal_places=2, max_digits=10)
+    quote_date: QuoteDate
 
 
 class QuoteUpdate(BaseModel):
@@ -76,6 +89,7 @@ class QuoteUpdate(BaseModel):
     quoted_price: Decimal | None = Field(
         default=None, decimal_places=2, ge=0, max_digits=10
     )
+    quote_date: QuoteDate | None = None
 
 
 class QuoteResult(CompareResult):

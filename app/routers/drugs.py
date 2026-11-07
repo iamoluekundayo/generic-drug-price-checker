@@ -1,5 +1,6 @@
 """HTTP routes for searching drugs, viewing their NADAC price history, and comparing a pharmacy's quoted price against the NADAC benchmark."""
 
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -86,25 +87,27 @@ def get_price_history(drug_id: int, db: Annotated[Session, Depends(get_db)]):
 
 @router.post("/compare", response_model=CompareResult)
 def compare(body: CompareRequest, db: Annotated[Session, Depends(get_db)]):
-    """Compare a quoted price against the drug's latest NADAC price.
+    """Compare a quoted price against the NADAC price on or before the quote date (today if none is given)
 
     The NADAC per-unit price is scaled by the requested quantity, and the
     result is set against the quoted price to show the difference and the
     markup percentage.
 
     Args:
-        body:
+        body: the drug, quantity, quoted price and optional quote date.
 
     Raises:
-        HTTPException: 404 if the drug does not exist, or if it has no
-            price to compare against.
+        HTTPException: 404 if the drug does not exist; 422 if there is no price on or before the date
     """
     drug = db.get(Drug, body.drug_id)
     if drug is None:
         raise HTTPException(status_code=404, detail="Drug not found")
-    price = get_latest_price(db, drug.id)
+    quote_date = body.quote_date or date.today()
+    price = get_latest_price(db, drug.id, quote_date)
     if price is None:
-        raise HTTPException(status_code=404, detail="No price for this drug")
+        raise HTTPException(
+            status_code=422, detail=f"No NADAC price on or before {quote_date}"
+        )
 
     # Returns a dict with "nadac_total", "difference", and "markup_percent".
     compare_numbers = get_compare_numbers(
@@ -122,4 +125,5 @@ def compare(body: CompareRequest, db: Annotated[Session, Depends(get_db)]):
         nadac_total=compare_numbers["nadac_total"],
         difference=compare_numbers["difference"],
         markup_percent=compare_numbers["markup_percent"],
+        quote_date=quote_date,
     )

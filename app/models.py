@@ -90,6 +90,7 @@ class Quote(Base):
     drug_id: Mapped[int] = mapped_column(ForeignKey("drugs.id"))
     quantity: Mapped[Decimal] = mapped_column(Numeric(10, 3))
     quoted_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    quote_date: Mapped[date]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     user: Mapped["User"] = relationship(back_populates="quotes")
     drug: Mapped["Drug"] = relationship()

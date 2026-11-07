@@ -25,7 +25,7 @@ def get_own_quote(db: Session, quote_id: int, user_id: int) -> Quote:
 def to_quote_result(db: Session, quote: Quote) -> QuoteResult:
     # quote --> drug --> price
     drug = quote.drug
-    price = get_latest_price(db, drug.id)
+    price = get_latest_price(db, drug.id, quote.quote_date)
     if price is None:
         raise HTTPException(status_code=404, detail="Price not found")
     compare_numbers = get_compare_numbers(
@@ -42,6 +42,7 @@ def to_quote_result(db: Session, quote: Quote) -> QuoteResult:
         quoted_price=quote.quoted_price,
         **compare_numbers,
         created_at=quote.created_at,
+        quote_date=quote.quote_date,
     )
 
 
@@ -54,14 +55,17 @@ def create_quotes(
     drug = db.get(Drug, body.drug_id)
     if drug is None:
         raise HTTPException(status_code=404, detail="Drug not found")
-    price = get_latest_price(db, drug.id)
+    price = get_latest_price(db, drug.id, body.quote_date)
     if price is None:
-        raise HTTPException(status_code=404, detail="Price not found")
+        raise HTTPException(
+            status_code=422, detail=f"No NADAC price on or before {body.quote_date}"
+        )
     quote = Quote(
         user_id=current_user.id,
         drug_id=drug.id,
         quantity=body.quantity,
         quoted_price=body.quoted_price,
+        quote_date=body.quote_date,
     )
     db.add(quote)
     db.commit()
@@ -110,6 +114,14 @@ def update_quote(
         quote.quantity = updates.quantity
     if updates.quoted_price is not None:
         quote.quoted_price = updates.quoted_price
+    if updates.quote_date is not None:
+        price = get_latest_price(db, quote.drug_id, updates.quote_date)
+        if price is None:
+            raise HTTPException(
+                status_code=422,
+                detail=f"No NADAC price on or before {updates.quote_date}",
+            )
+        quote.quote_date = updates.quote_date
     db.commit()
     return to_quote_result(db, quote)
 

@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
 from sqlalchemy import Subquery, func, select, tuple_
@@ -42,10 +43,12 @@ def latest_prices_subquery() -> Subquery:
     )
 
 
-def get_latest_price(db: Session, drug_id: int) -> Price | None:
-    return db.scalars(
-        select(Price)
-        .where(Price.drug_id == drug_id)
-        .order_by(Price.effective_date.desc())
-        .limit(1)
-    ).first()
+def get_latest_price(
+    db: Session, drug_id: int, on_date: date | None = None
+) -> Price | None:
+    stmt = select(Price).where(
+        Price.drug_id == drug_id,
+    )
+    if on_date is not None:
+        stmt = stmt.where(Price.effective_date <= on_date)
+    return db.scalars(stmt.order_by(Price.effective_date.desc()).limit(1)).first()
