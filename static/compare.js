@@ -67,7 +67,6 @@ compareForm.addEventListener("submit", async (event) => {
   }
 
   compareMessage.textContent = "Loading...";
-  console.log(compareFormQuoteDate.value);
   try {
     compareFormSubmit.disabled = true;
     compareResult = await api("/compare", {
@@ -127,6 +126,7 @@ compareSaveButton.addEventListener("click", async () => {
         drug_id: compareResult.drug_id,
         quantity: compareResult.quantity,
         quoted_price: compareResult.quoted_price,
+        quote_date: compareResult.quote_date,
       },
     });
   } catch (err) {

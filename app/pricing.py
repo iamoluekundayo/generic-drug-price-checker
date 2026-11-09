@@ -50,5 +50,6 @@ def get_latest_price(
         Price.drug_id == drug_id,
     )
     if on_date is not None:
+        print(on_date)
         stmt = stmt.where(Price.effective_date <= on_date)
     return db.scalars(stmt.order_by(Price.effective_date.desc()).limit(1)).first()
