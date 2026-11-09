@@ -16,6 +16,7 @@ const compareFormUnit = document.getElementById("compare-form-unit");
 const compareFormQuotedPrice = document.getElementById(
   "compare-form-quoted-price",
 );
+const compareFormQuoteDate = document.getElementById("compare-form-quote-date");
 const compareFormSubmit = document.getElementById("compare-form-submit");
 const compareMessage = document.getElementById("compare-message");
 
@@ -55,6 +56,7 @@ compareForm.addEventListener("submit", async (event) => {
   resetSave();
   const quantity = compareFormQuantity.value;
   const quotedPrice = compareFormQuotedPrice.value;
+  const quoteDate = compareFormQuoteDate.value;
   if (Number(quantity) <= 0) {
     compareMessage.textContent = "Quantity should be greater than 0";
     return;
@@ -65,6 +67,7 @@ compareForm.addEventListener("submit", async (event) => {
   }
 
   compareMessage.textContent = "Loading...";
+  console.log(compareFormQuoteDate.value);
   try {
     compareFormSubmit.disabled = true;
     compareResult = await api("/compare", {
@@ -73,6 +76,7 @@ compareForm.addEventListener("submit", async (event) => {
         drug_id: compareDrug.id,
         quantity: quantity,
         quoted_price: quotedPrice,
+        quote_date: quoteDate,
       },
     });
   } catch (err) {

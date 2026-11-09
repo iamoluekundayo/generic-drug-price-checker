@@ -112,6 +112,8 @@
               step="0.01"
               inputmode="decimal"
             />
+            <label for="compare-form-quote-date">Quote Date: </label>
+            <input id="compare-form-quote-date" type="date" required />
             <button
               id="compare-form-submit"
               type="submit"
@@ -124,8 +126,13 @@
           <div id="compare-result-display"></div>
           <div id="compare-save">
             <button id="compare-save-button" class="d-none">Save</button>
-            <a id="compare-save-login" href="/login.html" class="d-none"></a>
+            <a id="compare-save-login" href="/login.html" class="d-none"
+              >Log in to save quote</a
+            >
             <p id="compare-save-message" class="d-none"></p>
+            <a id="compare-save-confirm" href="/quotes.html">
+              View your quotes</a
+            >
           </div>
         </section>
       </div>
