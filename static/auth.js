@@ -11,7 +11,7 @@ async function login(email, password) {
 }
 
 const SAFE_NEXT = ["/", "/quotes.html"];
-const next = new URLSearchParams(window.location.search).get(next);
+const next = new URLSearchParams(window.location.search).get("next");
 const destination = SAFE_NEXT.includes(next) ? next : "/";
 
 // login
