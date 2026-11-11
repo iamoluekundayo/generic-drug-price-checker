@@ -10,6 +10,10 @@ async function login(email, password) {
   });
 }
 
+const SAFE_NEXT = ["/", "/quotes.html"];
+const next = new URLSearchParams(window.location.search).get(next);
+const destination = SAFE_NEXT.includes(next) ? next : "/";
+
 // login
 const loginForm = document.getElementById("login-form");
 const loginEmail = document.getElementById("login-email");
@@ -37,7 +41,7 @@ loginForm.addEventListener("submit", async (event) => {
 
   saveToken(token.access_token);
 
-  window.location.href = "/";
+  window.location.href = destination;
 });
 
 // register
@@ -92,5 +96,5 @@ registerForm.addEventListener("submit", async (event) => {
   }
 
   saveToken(token.access_token);
-  window.location.href = "/";
+  window.location.href = destination;
 });
