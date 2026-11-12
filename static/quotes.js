@@ -10,9 +10,15 @@ deleting one quote
 */
 
 "use strict";
+const QUOTES_PAGE_SIZE = 2;
+let quotesCurrentPage = 1;
 
 const quotesEmpty = document.getElementById("quotes-empty");
 const quotesContainer = document.getElementById("quotes-container");
+const quotesRangeText = document.getElementById("quotes-range-text");
+const quotesPreviousButton = document.getElementById("quotes-previous-button");
+const quotesPageText = document.getElementById("quotes-page-text");
+const quotesNextButton = document.getElementById("quotes-next-button");
 const quotesError = document.getElementById("quotes-error");
 
 function formatDate(date) {
@@ -175,13 +181,22 @@ function createCard(quote) {
   return cardWrapper;
 }
 
-function renderQuotes(quotes) {
-  if (quotes.length === 0) {
+function renderQuotes(quotes, totalQuotes) {
+  if (totalQuotes === 0) {
     quotesContainer.replaceChildren();
+    quotesPreviousButton.classList.add("d-none");
+    quotesNextButton.classList.add("d-none");
+    quotesRangeText.classList.add("d-none");
+    quotesPageText.classList.add("d-none");
     quotesError.classList.add("d-none");
     quotesEmpty.classList.remove("d-none");
   } else {
     quotesContainer.replaceChildren();
+    quotesPreviousButton.classList.remove("d-none");
+    quotesNextButton.classList.remove("d-none");
+    quotesRangeText.classList.remove("d-none");
+    quotesPageText.classList.remove("d-none");
+    quotesEmpty.classList.add("d-none");
     for (const quote of quotes) {
       quotesContainer.append(createCard(quote));
     }
@@ -190,14 +205,20 @@ function renderQuotes(quotes) {
 }
 
 async function loadQuotes() {
+  quotesPreviousButton.disabled = true;
+  quotesNextButton.disabled = true;
+  const params = new URLSearchParams({
+    page: quotesCurrentPage,
+    page_size: QUOTES_PAGE_SIZE,
+  });
   if (!getToken()) {
     window.location.replace("/login.html?next=/quotes.html");
   } else {
     quotesError.classList.remove("d-none");
+    let quotesResponse;
     try {
       quotesError.textContent = "loading...";
-      const quotes = await api("/quotes");
-      renderQuotes(quotes);
+      quotesResponse = await api("/quotes?" + params);
     } catch (err) {
       if (err.status === 401) {
         window.location.replace("/login.html?next=/quotes.html");
@@ -205,7 +226,47 @@ async function loadQuotes() {
       }
       quotesError.textContent = err.message;
       quotesError.classList.remove("d-none");
+      return;
+    }
+
+    if (
+      quotesResponse.items.length === 0 &&
+      quotesResponse.total > 0 &&
+      quotesCurrentPage > 1
+    ) {
+      quotesCurrentPage--;
+      loadQuotes();
+      return;
+    }
+
+    const firstShown = (quotesCurrentPage - 1) * QUOTES_PAGE_SIZE + 1;
+    const lastShown = firstShown + (quotesResponse.items.length - 1);
+    const totalQuotes = quotesResponse.total;
+    const quotes = quotesResponse.items;
+    const totalPages = Math.ceil(totalQuotes / quotesResponse.page_size);
+    quotesRangeText.textContent = `Showing ${firstShown}-${lastShown} of ${totalQuotes} quotes`;
+    quotesPageText.textContent = `Page ${quotesResponse.page} of ${Math.max(totalPages, 1)}`;
+
+    renderQuotes(quotes, totalQuotes);
+
+    if (quotesCurrentPage > 1) {
+      quotesPreviousButton.disabled = false;
+    }
+    if (quotesResponse.page < totalPages) {
+      quotesNextButton.disabled = false;
     }
   }
 }
 loadQuotes();
+
+// previous button
+quotesPreviousButton.addEventListener("click", () => {
+  quotesCurrentPage--;
+  loadQuotes();
+});
+
+// next button
+quotesNextButton.addEventListener("click", () => {
+  quotesCurrentPage++;
+  loadQuotes();
+});
