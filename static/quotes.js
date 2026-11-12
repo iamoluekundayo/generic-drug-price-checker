@@ -80,8 +80,6 @@ function createCard(quote) {
   });
   tileContainer.append(nadacTotalContainer);
 
-  // createItem({ element: "", classes: [] });
-  // createItem({ element: "", classes: [], text: "" });
   const nadacTotalTitle = createItem({
     element: "p",
     classes: [],
@@ -94,7 +92,44 @@ function createCard(quote) {
   });
   nadacTotalContainer.append(nadacTotalTitle, nadacTotal);
 
-  cardBody.append(drugName, quoteDate, tileContainer);
+  const difference = createItem({
+    element: "p",
+    classes: ["fw-bold", "text-warning-emphasis"],
+    text: `${Number(quote.difference) >= 0 ? "+" : "-"}$${Math.abs(Number(quote.difference))} ${quote.markup_percent}% ${Number(quote.difference) >= 0 ? "above" : "below "} NADAC`,
+  });
+
+  const divider = createItem({ element: "hr", classes: [] });
+
+  const cardButtons = createItem({
+    element: "div",
+    classes: ["d-flex", "gap-2"],
+  });
+
+  // createItem({ element: "", classes: [] });
+  // createItem({ element: "", classes: [], text: "" });
+  const editButton = createItem({
+    element: "button",
+    classes: ["btn", "btn-outline-secondary"],
+    text: "Edit",
+  });
+
+  const deleteButton = createItem({
+    element: "button",
+    classes: ["btn", "btn-outline-danger"],
+    text: "Delete",
+  });
+
+  cardButtons.append(editButton, deleteButton);
+
+  //${Number(compareResult.difference) >= 0 ? "above" : "below"}
+  cardBody.append(
+    drugName,
+    quoteDate,
+    tileContainer,
+    difference,
+    divider,
+    cardButtons,
+  );
   quotesContainer.append(card);
 }
 
