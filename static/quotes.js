@@ -10,7 +10,7 @@ deleting one quote
 */
 
 "use strict";
-const QUOTES_PAGE_SIZE = 2;
+const QUOTES_PAGE_SIZE = 3;
 let quotesCurrentPage = 1;
 
 const quotesEmpty = document.getElementById("quotes-empty");
@@ -59,7 +59,7 @@ function createQuoteCard(quote) {
     classes: ["card-body"],
   });
   card.append(cardBody);
-  const drugNameText = makeElement({
+  const drugTitle = makeElement({
     tag: "p",
     classes: ["card-title", "fw-bold"],
     text: quote.ndc_description,
@@ -163,6 +163,11 @@ function createQuoteCard(quote) {
     text: "Edit",
   });
 
+  editButton.addEventListener("click", () => {
+    cardBody.classList.add("d-none");
+    editCardBody.classList.remove("d-none");
+  });
+
   const deleteButton = makeElement({
     tag: "button",
     classes: ["btn", "btn-outline-danger"],
@@ -194,13 +199,146 @@ function createQuoteCard(quote) {
 
   cardButtons.append(editButton, deleteButton);
   cardBody.append(
-    drugNameText,
+    drugTitle,
     quoteDetailsText,
     priceTilesRow,
     differenceText,
     divider,
     cardButtons,
   );
+
+  const editCardBody = makeElement({
+    tag: "div",
+    classes: ["card-body", "d-none"],
+  });
+  card.append(editCardBody);
+  const editDrugTitle = makeElement({
+    tag: "p",
+    classes: ["card-title", "fw-bold"],
+    text: quote.ndc_description,
+  });
+  const editModeLabel = makeElement({
+    tag: "p",
+    classes: ["small", "text-body-secondary"],
+    text: "Editing quote",
+  });
+
+  const quotePriceLabel = makeElement({
+    tag: "label",
+    classes: ["small", "text-body-secondary"],
+    text: "Quote Price($)",
+  });
+
+  const quotePriceInput = makeElement({
+    tag: "input",
+    classes: ["form-control"],
+  });
+  quotePriceInput.type = "number";
+  quotePriceInput.min = "0.001";
+  quotePriceInput.step = "0.001";
+  quotePriceInput.inputMode = "decimal";
+  quotePriceInput.value = quote.quoted_price;
+
+  const quantityLabel = makeElement({
+    tag: "label",
+    classes: ["small", "text-body-secondary"],
+    text: `Quantity (${quote.pricing_unit})`,
+  });
+
+  const quantityInput = makeElement({
+    tag: "input",
+    classes: ["form-control"],
+  });
+  quantityInput.type = "number";
+  quantityInput.min = "0";
+  quantityInput.step = "0.01";
+  quantityInput.inputMode = "decimal";
+  quantityInput.value = Number(quote.quantity);
+
+  const quoteDateLabel = makeElement({
+    tag: "label",
+    classes: ["small", "text-body-secondary"],
+    text: `Quote Date (${quote.pricing_unit})`,
+  });
+
+  const quoteDateInput = makeElement({
+    tag: "input",
+    classes: ["form-control"],
+  });
+
+  quoteDateInput.type = "date";
+  quoteDateInput.value = quote.quote_date;
+
+  const editButtons = makeElement({
+    tag: "div",
+    classes: ["d-flex", "gap-2"],
+  });
+
+  const messageBox = makeElement({
+    tag: "p",
+    classes: [],
+    text: "",
+  });
+
+  const saveButton = makeElement({
+    tag: "button",
+    classes: ["btn", "btn-primary"],
+    text: "Save",
+  });
+
+  saveButton.addEventListener("click", async () => {
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving";
+    try {
+      await api(`/quotes/${quote.id}`, {
+        method: "PATCH",
+        body: {
+          quantity: quantityInput.value,
+          quoted_price: quotePriceInput.value,
+          quote_date: quoteDateInput.value,
+        },
+      });
+    } catch (err) {
+      if (err.status === 404) {
+        loadQuotes();
+        return;
+      } else if (err.status === 401) {
+        window.location.replace("/login.html?next=/quotes.html");
+        return;
+      }
+      saveButton.disabled = false;
+      saveButton.textContent = "Save";
+      messageBox.textContent = err.message;
+      return;
+    }
+    loadQuotes();
+  });
+
+  const cancelButton = makeElement({
+    tag: "button",
+    classes: ["btn", "btn-outline-secondary"],
+    text: "Cancel",
+  });
+
+  cancelButton.addEventListener("click", () => {
+    loadQuotes();
+  });
+
+  editButtons.append(saveButton, cancelButton);
+
+  editCardBody.append(
+    editDrugTitle,
+    editModeLabel,
+    quotePriceLabel,
+    quotePriceInput,
+    quantityLabel,
+    quantityInput,
+    quoteDateLabel,
+    quoteDateInput,
+    messageBox,
+    editButtons,
+  );
+
   return cardColumn;
 }
 
