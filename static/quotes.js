@@ -37,13 +37,13 @@ function formatAmount(num, decimal) {
   });
 }
 
-function makeElement({ element = "div", classes = [], text = "" } = {}) {
-  const item = document.createElement(element);
+function makeElement({ tag = "div", classes = [], text = "" } = {}) {
+  const item = document.createElement(tag);
   if (classes.length !== 0) {
     item.classList.add(...classes);
   }
 
-  if (text.trim().length !== 0) {
+  if (text && String(text).trim().length !== 0) {
     item.textContent = text;
   }
   return item;
@@ -169,8 +169,27 @@ function createQuoteCard(quote) {
     text: "Delete",
   });
 
-  deleteButton.addEventListener("click", () => {
-    confirm("Delete this quote?");
+  deleteButton.addEventListener("click", async () => {
+    if (!confirm("Delete this quote?")) {
+      return;
+    }
+
+    try {
+      deleteButton.disabled = true;
+      await api(`/quotes/${quote.id}`, { method: "DELETE" });
+      loadQuotes();
+    } catch (err) {
+      if (err.status === 404) {
+        loadQuotes();
+        return;
+      } else if (err.status === 401) {
+        window.location.replace("/login.html?next=/quotes.html");
+        return;
+      }
+      deleteButton.disabled = false;
+      quotesError.textContent = err.message;
+      quotesError.classList.remove("d-none");
+    }
   });
 
   cardButtons.append(editButton, deleteButton);
