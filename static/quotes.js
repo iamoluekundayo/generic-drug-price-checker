@@ -24,7 +24,18 @@ function formatDate(date) {
   });
 }
 
-function createItem({ element = "", classes = [""], text = "" } = {}) {
+function formatNum(num, decimal) {
+  const parsed = Number(num);
+  if (num === null || num === "" || Number.isNaN(parsed)) {
+    return "0.00";
+  }
+  return Math.abs(Number(num)).toLocaleString("en-US", {
+    minimumFractionDigits: decimal,
+    maximumFractionDigits: decimal,
+  });
+}
+
+function createItem({ element = "div", classes = [], text = "" } = {}) {
   const item = document.createElement(element);
   if (classes.length !== 0) {
     item.classList.add(...classes);
@@ -37,10 +48,15 @@ function createItem({ element = "", classes = [""], text = "" } = {}) {
 }
 
 function createCard(quote) {
-  const card = createItem({ element: "div", classes: ["card"] });
+  const card = createItem({ element: "div", classes: ["card", "h-100"] });
 
-  const cardBody = createItem({ element: "div", classes: ["card-body"] });
-  card.append(cardBody);
+  const cardWrapper = createItem({ element: "div", classes: ["col"] });
+  card.append(cardWrapper);
+  const cardBody = createItem({
+    element: "div",
+    classes: ["card-body", "col"],
+  });
+  cardWrapper.append(cardBody);
   const drugName = createItem({
     element: "p",
     classes: ["card-title", "fw-bold"],
@@ -50,52 +66,72 @@ function createCard(quote) {
   const quoteDate = createItem({
     element: "p",
     classes: ["small", "text-body-secondary"],
-    text: `Quoted ${formatDate(quote.quote_date)} · ${quote.quantity} ${quote.pricing_unit}`,
+    text: `Quoted ${formatDate(quote.quote_date)} · ${Number(quote.quantity)} ${quote.pricing_unit}`,
   });
 
   const tileContainer = createItem({ element: "div", classes: ["row", "g-2"] });
 
   const quotedPriceContainer = createItem({
     element: "div",
-    classes: ["col-6", "bg-body-tertiary", "rounded", "p-3"],
+    classes: ["col-6"],
   });
   tileContainer.append(quotedPriceContainer);
 
+  const quotePriceBg = createItem({
+    element: "div",
+    classes: ["bg-body-tertiary", "rounded", "p-3"],
+  });
+  quotedPriceContainer.append(quotePriceBg);
+
   const quotePriceTitle = createItem({
     element: "p",
-    classes: [],
+    classes: ["mb-0"],
     text: "Quoted price",
   });
+
   const quotedPrice = createItem({
     element: "p",
-    classes: ["fs-3", "fw-bold"],
+    classes: ["fs-3", "fw-bold", "mb-0"],
     text: `$${quote.quoted_price}`,
   });
 
-  quotedPriceContainer.append(quotePriceTitle, quotedPrice);
+  quotePriceBg.append(quotePriceTitle, quotedPrice);
 
   const nadacTotalContainer = createItem({
     element: "div",
-    classes: ["col-6", "bg-body-tertiary", "rounded", "p-3"],
+    classes: ["col-6"],
   });
   tileContainer.append(nadacTotalContainer);
 
+  const nadacTotalBg = createItem({
+    element: "div",
+    classes: ["bg-body-tertiary", "rounded", "p-3"],
+  });
+  nadacTotalContainer.append(nadacTotalBg);
+
   const nadacTotalTitle = createItem({
     element: "p",
-    classes: [],
+    classes: ["mb-0"],
     text: "NADAC total",
   });
   const nadacTotal = createItem({
     element: "p",
-    classes: ["fs-3", "fw-bold"],
+    classes: ["fs-3", "fw-bold", "mb-0"],
     text: `$${quote.nadac_total}`,
   });
-  nadacTotalContainer.append(nadacTotalTitle, nadacTotal);
+  nadacTotalBg.append(nadacTotalTitle, nadacTotal);
+
+  let markupPercent;
+  if (quote.markup_percent === null) {
+    markupPercent = "not available";
+  } else {
+    markupPercent = `${formatNum(quote.markup_percent, 2)}%`;
+  }
 
   const difference = createItem({
     element: "p",
     classes: ["fw-bold", "text-warning-emphasis"],
-    text: `${Number(quote.difference) >= 0 ? "+" : "-"}$${Math.abs(Number(quote.difference))} ${quote.markup_percent}% ${Number(quote.difference) >= 0 ? "above" : "below "} NADAC`,
+    text: `${Number(quote.difference) >= 0 ? "+" : "-"}$${formatNum(quote.difference, 2)} ${markupPercent} ${Number(quote.difference) >= 0 ? "above" : "below "} NADAC`,
   });
 
   const divider = createItem({ element: "hr", classes: [] });
@@ -105,8 +141,6 @@ function createCard(quote) {
     classes: ["d-flex", "gap-2"],
   });
 
-  // createItem({ element: "", classes: [] });
-  // createItem({ element: "", classes: [], text: "" });
   const editButton = createItem({
     element: "button",
     classes: ["btn", "btn-outline-secondary"],
@@ -120,8 +154,6 @@ function createCard(quote) {
   });
 
   cardButtons.append(editButton, deleteButton);
-
-  //${Number(compareResult.difference) >= 0 ? "above" : "below"}
   cardBody.append(
     drugName,
     quoteDate,
@@ -130,7 +162,7 @@ function createCard(quote) {
     divider,
     cardButtons,
   );
-  quotesContainer.append(card);
+  return card;
 }
 
 function renderQuotes(quotes) {
@@ -138,9 +170,8 @@ function renderQuotes(quotes) {
     quotesEmpty.classList.remove("d-none");
   } else {
     quotesContainer.replaceChildren();
-    quotesError.textContent = "loading...";
     for (const quote of quotes) {
-      createCard(quote);
+      quotesContainer.append(createCard(quote));
     }
     quotesError.classList.add("d-none");
   }
@@ -151,13 +182,16 @@ async function loadQuotes() {
     window.location.replace("/login.html?next=/quotes.html");
   } else {
     try {
+      quotesError.textContent = "loading...";
       const quotes = await api("/quotes");
       renderQuotes(quotes);
     } catch (err) {
       if (err.status === 401) {
         window.location.replace("/login.html?next=/quotes.html");
+        return;
       }
       quotesError.textContent = err.message;
+      quotesError.classList.remove("d-none");
     }
   }
 }
