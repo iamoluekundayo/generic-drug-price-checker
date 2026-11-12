@@ -80,7 +80,7 @@ def get_quotes(
     db: Annotated[Session, Depends(get_db)],
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
-) -> list[QuoteResult]:
+) -> QuotePage:
     total = db.scalar(
         select(func.count()).select_from(Quote).where(Quote.user_id == current_user.id)
     )
