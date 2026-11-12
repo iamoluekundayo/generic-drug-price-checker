@@ -1,13 +1,13 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Drug, Quote, User
 from app.pricing import get_compare_numbers, get_latest_price
-from app.schemas import QuoteCreate, QuoteResult, QuoteUpdate
+from app.schemas import QuoteCreate, QuotePage, QuoteResult, QuoteUpdate
 from app.security import get_current_user
 
 router = APIRouter(prefix="/quotes", tags=["quotes"])
@@ -74,13 +74,16 @@ def create_quotes(
     return to_quote_result(db, quote)
 
 
-@router.get("", response_model=list[QuoteResult])
+@router.get("", response_model=QuotePage)
 def get_quotes(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> list[QuoteResult]:
+    total = db.scalar(
+        select(func.count()).select_from(Quote).where(Quote.user_id == current_user.id)
+    )
     quote_instances = db.scalars(
         select(Quote)
         .where(Quote.user_id == current_user.id)
@@ -89,7 +92,7 @@ def get_quotes(
         .offset((page - 1) * page_size)
     ).all()
     quotes_list = [to_quote_result(db, quote) for quote in quote_instances]
-    return quotes_list
+    return QuotePage(items=quotes_list, total=total, page=page, page_size=page_size)
 
 
 @router.get("/{quote_id}", response_model=QuoteResult)

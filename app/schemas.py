@@ -97,3 +97,10 @@ class QuoteUpdate(BaseModel):
 class QuoteResult(CompareResult):
     id: int
     created_at: datetime
+
+
+class QuotePage(BaseModel):
+    items: list[QuoteResult]
+    total: int
+    page: int
+    page_size: int
