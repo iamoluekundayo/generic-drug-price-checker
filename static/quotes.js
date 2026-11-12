@@ -37,7 +37,7 @@ function formatAmount(num, decimal) {
   });
 }
 
-function createItem({ element = "div", classes = [], text = "" } = {}) {
+function makeElement({ element = "div", classes = [], text = "" } = {}) {
   const item = document.createElement(element);
   if (classes.length !== 0) {
     item.classList.add(...classes);
@@ -49,136 +49,140 @@ function createItem({ element = "div", classes = [], text = "" } = {}) {
   return item;
 }
 
-function createCard(quote) {
-  const cardWrapper = createItem({ element: "div", classes: ["col"] });
-  const card = createItem({ element: "div", classes: ["card", "h-100"] });
+function createQuoteCard(quote) {
+  const cardColumn = makeElement({ tag: "div", classes: ["col"] });
+  const card = makeElement({ tag: "div", classes: ["card", "h-100"] });
 
-  cardWrapper.append(card);
-  const cardBody = createItem({
-    element: "div",
+  cardColumn.append(card);
+  const cardBody = makeElement({
+    tag: "div",
     classes: ["card-body"],
   });
   card.append(cardBody);
-  const drugName = createItem({
-    element: "p",
+  const drugNameText = makeElement({
+    tag: "p",
     classes: ["card-title", "fw-bold"],
     text: quote.ndc_description,
   });
 
-  const quoteDate = createItem({
-    element: "p",
+  const quoteDetailsText = makeElement({
+    tag: "p",
     classes: ["small", "text-body-secondary"],
     text: `Quoted ${formatDate(quote.quote_date)} · ${Number(quote.quantity)} ${quote.pricing_unit}`,
   });
 
-  const tileContainer = createItem({ element: "div", classes: ["row", "g-2"] });
+  const priceTilesRow = makeElement({ tag: "div", classes: ["row", "g-2"] });
 
-  const quotedPriceContainer = createItem({
-    element: "div",
+  const quotedPriceColumn = makeElement({
+    tag: "div",
     classes: ["col-6"],
   });
-  tileContainer.append(quotedPriceContainer);
+  priceTilesRow.append(quotedPriceColumn);
 
-  const quotePriceBg = createItem({
-    element: "div",
+  const quotedPriceTitle = makeElement({
+    tag: "div",
     classes: ["bg-body-tertiary", "rounded", "p-3"],
   });
-  quotedPriceContainer.append(quotePriceBg);
+  quotedPriceColumn.append(quotedPriceTitle);
 
-  const quotePriceTitle = createItem({
-    element: "p",
+  const quotedPriceLabel = makeElement({
+    tag: "p",
     classes: ["mb-0", "small", "text-body-secondary"],
     text: "Quoted price",
   });
 
-  const quotedPrice = createItem({
-    element: "p",
+  const quotedPriceValue = makeElement({
+    tag: "p",
     classes: ["fs-4", "fw-bold", "text-nowrap", "mb-0"],
     text: `$${formatAmount(quote.quoted_price, 2)}`,
   });
 
-  quotePriceBg.append(quotePriceTitle, quotedPrice);
+  quotedPriceTitle.append(quotedPriceLabel, quotedPriceValue);
 
-  const nadacTotalContainer = createItem({
-    element: "div",
+  const nadacTotalColumn = makeElement({
+    tag: "div",
     classes: ["col-6"],
   });
-  tileContainer.append(nadacTotalContainer);
+  priceTilesRow.append(nadacTotalColumn);
 
-  const nadacTotalBg = createItem({
-    element: "div",
+  const nadacTotalTile = makeElement({
+    tag: "div",
     classes: ["bg-body-tertiary", "rounded", "p-3"],
   });
-  nadacTotalContainer.append(nadacTotalBg);
+  nadacTotalColumn.append(nadacTotalTile);
 
-  const nadacTotalTitle = createItem({
-    element: "p",
+  const nadacTotalLabel = makeElement({
+    tag: "p",
     classes: ["mb-0", "small", "text-body-secondary"],
     text: "NADAC total",
   });
-  const nadacTotal = createItem({
-    element: "p",
+  const nadacTotalValue = makeElement({
+    tag: "p",
     classes: ["fs-4", "fw-bold", "text-nowrap", "mb-0"],
     text: `$${formatAmount(quote.nadac_total, 2)}`,
   });
-  nadacTotalBg.append(nadacTotalTitle, nadacTotal);
+  nadacTotalTile.append(nadacTotalLabel, nadacTotalValue);
 
-  let markupPercent;
+  let markupPercentText;
   if (quote.markup_percent === null) {
-    markupPercent = "not available";
+    markupPercentText = "not available";
   } else {
-    markupPercent = `${formatAmount(quote.markup_percent, 2)}%`;
+    markupPercentText = `${formatAmount(quote.markup_percent, 2)}%`;
   }
 
-  const diff = Number(quote.difference);
+  const differenceFromNadac = Number(quote.difference);
 
-  const text =
-    Number(quote.difference) !== 0
-      ? `$${formatAmount(quote.difference, 2)} (${markupPercent}) ${diff > 0 ? "above" : "below"} NADAC`
+  const differenceSummary =
+    differenceFromNadac !== 0
+      ? `$${formatAmount(differenceFromNadac, 2)} (${markupPercentText}) ${differenceFromNadac > 0 ? "above" : "below"} NADAC`
       : "Same as NADAC";
 
-  const difference = createItem({
-    element: "p",
+  const differenceText = makeElement({
+    tag: "p",
     classes: ["fw-bold"],
-    text: text,
+    text: differenceSummary,
   });
-  if (diff > 0) {
-    difference.classList.add("text-warning-emphasis");
-  } else if (diff < 0) {
-    difference.classList.add("text-success-emphasis");
+  if (differenceFromNadac > 0) {
+    differenceText.classList.add("text-warning-emphasis");
+  } else if (differenceFromNadac < 0) {
+    differenceText.classList.add("text-success-emphasis");
   } else {
-    difference.classList.add("text-body-secondary");
+    differenceText.classList.add("text-body-secondary");
   }
 
-  const divider = createItem({ element: "hr", classes: [] });
+  const divider = makeElement({ tag: "hr", classes: [] });
 
-  const cardButtons = createItem({
-    element: "div",
+  const cardButtons = makeElement({
+    tag: "div",
     classes: ["d-flex", "gap-2"],
   });
 
-  const editButton = createItem({
-    element: "button",
+  const editButton = makeElement({
+    tag: "button",
     classes: ["btn", "btn-outline-secondary"],
     text: "Edit",
   });
 
-  const deleteButton = createItem({
-    element: "button",
+  const deleteButton = makeElement({
+    tag: "button",
     classes: ["btn", "btn-outline-danger"],
     text: "Delete",
   });
 
+  deleteButton.addEventListener("click", () => {
+    confirm("Delete this quote?");
+  });
+
   cardButtons.append(editButton, deleteButton);
   cardBody.append(
-    drugName,
-    quoteDate,
-    tileContainer,
-    difference,
+    drugNameText,
+    quoteDetailsText,
+    priceTilesRow,
+    differenceText,
     divider,
     cardButtons,
   );
-  return cardWrapper;
+  return cardColumn;
 }
 
 function renderQuotes(quotes, totalQuotes) {
@@ -198,7 +202,7 @@ function renderQuotes(quotes, totalQuotes) {
     quotesPageText.classList.remove("d-none");
     quotesEmpty.classList.add("d-none");
     for (const quote of quotes) {
-      quotesContainer.append(createCard(quote));
+      quotesContainer.append(createQuoteCard(quote));
     }
     quotesError.classList.add("d-none");
   }
