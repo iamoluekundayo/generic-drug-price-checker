@@ -24,11 +24,7 @@ function formatDate(date) {
   });
 }
 
-function formatNum(num, decimal) {
-  const parsed = Number(num);
-  if (num === null || num === "" || Number.isNaN(parsed)) {
-    return "0.00";
-  }
+function formatAmount(num, decimal) {
   return Math.abs(Number(num)).toLocaleString("en-US", {
     minimumFractionDigits: decimal,
     maximumFractionDigits: decimal,
@@ -48,15 +44,15 @@ function createItem({ element = "div", classes = [], text = "" } = {}) {
 }
 
 function createCard(quote) {
+  const cardWrapper = createItem({ element: "div", classes: ["col"] });
   const card = createItem({ element: "div", classes: ["card", "h-100"] });
 
-  const cardWrapper = createItem({ element: "div", classes: ["col"] });
-  card.append(cardWrapper);
+  cardWrapper.append(card);
   const cardBody = createItem({
     element: "div",
-    classes: ["card-body", "col"],
+    classes: ["card-body"],
   });
-  cardWrapper.append(cardBody);
+  card.append(cardBody);
   const drugName = createItem({
     element: "p",
     classes: ["card-title", "fw-bold"],
@@ -85,14 +81,14 @@ function createCard(quote) {
 
   const quotePriceTitle = createItem({
     element: "p",
-    classes: ["mb-0"],
+    classes: ["mb-0", "small", "text-body-secondary"],
     text: "Quoted price",
   });
 
   const quotedPrice = createItem({
     element: "p",
-    classes: ["fs-3", "fw-bold", "mb-0"],
-    text: `$${quote.quoted_price}`,
+    classes: ["fs-4", "fw-bold", "text-nowrap", "mb-0"],
+    text: `$${formatAmount(quote.quoted_price, 2)}`,
   });
 
   quotePriceBg.append(quotePriceTitle, quotedPrice);
@@ -111,13 +107,13 @@ function createCard(quote) {
 
   const nadacTotalTitle = createItem({
     element: "p",
-    classes: ["mb-0"],
+    classes: ["mb-0", "small", "text-body-secondary"],
     text: "NADAC total",
   });
   const nadacTotal = createItem({
     element: "p",
-    classes: ["fs-3", "fw-bold", "mb-0"],
-    text: `$${quote.nadac_total}`,
+    classes: ["fs-4", "fw-bold", "text-nowrap", "mb-0"],
+    text: `$${formatAmount(quote.nadac_total, 2)}`,
   });
   nadacTotalBg.append(nadacTotalTitle, nadacTotal);
 
@@ -125,14 +121,28 @@ function createCard(quote) {
   if (quote.markup_percent === null) {
     markupPercent = "not available";
   } else {
-    markupPercent = `${formatNum(quote.markup_percent, 2)}%`;
+    markupPercent = `${formatAmount(quote.markup_percent, 2)}%`;
   }
+
+  const diff = Number(quote.difference);
+
+  const text =
+    Number(quote.difference) !== 0
+      ? `$${formatAmount(quote.difference, 2)} (${markupPercent}) ${diff > 0 ? "above" : "below"} NADAC`
+      : "Same as NADAC";
 
   const difference = createItem({
     element: "p",
-    classes: ["fw-bold", "text-warning-emphasis"],
-    text: `${Number(quote.difference) >= 0 ? "+" : "-"}$${formatNum(quote.difference, 2)} ${markupPercent} ${Number(quote.difference) >= 0 ? "above" : "below "} NADAC`,
+    classes: ["fw-bold"],
+    text: text,
   });
+  if (diff > 0) {
+    difference.classList.add("text-warning-emphasis");
+  } else if (diff < 0) {
+    difference.classList.add("text-success-emphasis");
+  } else {
+    difference.classList.add("text-body-secondary");
+  }
 
   const divider = createItem({ element: "hr", classes: [] });
 
@@ -162,11 +172,13 @@ function createCard(quote) {
     divider,
     cardButtons,
   );
-  return card;
+  return cardWrapper;
 }
 
 function renderQuotes(quotes) {
-  if (quotes.length == 0) {
+  if (quotes.length === 0) {
+    quotesContainer.replaceChildren();
+    quotesError.classList.add("d-none");
     quotesEmpty.classList.remove("d-none");
   } else {
     quotesContainer.replaceChildren();
@@ -181,6 +193,7 @@ async function loadQuotes() {
   if (!getToken()) {
     window.location.replace("/login.html?next=/quotes.html");
   } else {
+    quotesError.classList.remove("d-none");
     try {
       quotesError.textContent = "loading...";
       const quotes = await api("/quotes");
