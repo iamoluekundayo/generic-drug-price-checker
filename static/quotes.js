@@ -246,7 +246,7 @@ function buildEditBody(quote, { onSave, onCancel }) {
     label: `Quantity (${quote.pricing_unit})`,
     attrs: {
       type: "number",
-      min: "0.01",
+      min: "0",
       step: "0.01",
       inputMode: "decimal",
       value: Number(quote.quantity),
