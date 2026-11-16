@@ -365,6 +365,7 @@ function buildEditBody(quote, { onSave, onCancel }) {
     attrs: {
       type: "date",
       value: String(quote.quote_date).slice(0, 10),
+      max: localToday(),
     },
   });
 
