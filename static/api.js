@@ -109,6 +109,10 @@ function errorMessage(data) {
   return "Something went wrong";
 }
 
+function localToday() {
+  return new Date().toLocalDateString("en-CA");
+}
+
 async function updateNav() {
   const navLogin = document.getElementById("nav-login");
   const navLogout = document.getElementById("nav-logout");
