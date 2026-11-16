@@ -2,7 +2,7 @@
  * quotes.js
  *
  * Renders the signed-in user's saved drug price quotes on quotes.html.
- * Each quote is shown as a card comparing the quotes price with the
+ * Each quote is shown as a card comparing the quote's price with the
  * NADAC (National Average Drug Acquisition Cost) total. Users can edit
  * or delete a card in place, and page through quotes QUOTES_PAGE_SIZE
  * at a time.
@@ -518,7 +518,7 @@ async function loadQuotes() {
   // Loading state: block page changes until the request finishes.
   quotesPreviousButton.disabled = true;
   quotesNextButton.disabled = true;
-  showStatus("Loading");
+  showStatus("loading...");
   let response;
   try {
     response = await fetchQuotesPage(quotesCurrentPage);
