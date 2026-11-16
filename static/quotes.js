@@ -117,7 +117,7 @@ function makeButton(text, classes) {
 /**
  *
  * Creates a required input and a label linked to it by id.
- * @returns {{label: HTMLLabelElement, input: HTMLInputElement}}
+ * @returns {{wrapper, input: HTMLInputElement}}
  */
 function makeField({ id, label, attrs }) {
   const wrapper = makeElement({ classes: ["mb-3"] });
