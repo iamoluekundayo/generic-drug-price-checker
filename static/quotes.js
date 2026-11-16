@@ -340,8 +340,8 @@ function buildEditBody(quote, { onSave, onCancel }) {
     label: "Quoted price ($)",
     attrs: {
       type: "number",
-      min: "0.001",
-      step: "0.001",
+      min: "0",
+      step: "0.01",
       inputMode: "decimal",
       value: quote.quoted_price,
     },
@@ -352,8 +352,8 @@ function buildEditBody(quote, { onSave, onCancel }) {
     label: `Quantity (${quote.pricing_unit})`,
     attrs: {
       type: "number",
-      min: "0",
-      step: "0.01",
+      min: "0.001",
+      step: "0.001",
       inputMode: "decimal",
       value: Number(quote.quantity),
     },
