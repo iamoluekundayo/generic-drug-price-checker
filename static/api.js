@@ -110,7 +110,7 @@ function errorMessage(data) {
 }
 
 function localToday() {
-  return new Date().toLocalDateString("en-CA");
+  return new Date().toLocaleDateString("en-CA");
 }
 
 async function updateNav() {
