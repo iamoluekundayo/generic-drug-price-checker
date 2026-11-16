@@ -1,6 +1,6 @@
 "use strict";
 
-const QUOTES_PAGE_SIZE = 3;
+const QUOTES_PAGE_SIZE = 4;
 const LOGIN_URL = "/login.html?next=/quotes.html";
 
 let quotesCurrentPage = 1;
