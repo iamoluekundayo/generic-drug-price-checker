@@ -12,7 +12,7 @@
  * - getToken()
  *
  * Page states:
- * - Loading: message area shows "loading...", pagination disabled.
+ * - Loading: status message area shows "loading...", pagination disabled.
  * - Empty: no quotes; "empty" notice shown, pagination hidden.
  * - List: cards for the current page plus range and page text
  * - Error: Message area shows the API error text.
@@ -37,15 +37,15 @@ const quotesRangeText = document.getElementById("quotes-range-text");
 const quotesPreviousButton = document.getElementById("quotes-previous-button");
 const quotesPageText = document.getElementById("quotes-page-text");
 const quotesNextButton = document.getElementById("quotes-next-button");
-// Shared message area for both loading text and error text.
+const quotesStatus = document.getElementById("quotes-status");
 const quotesError = document.getElementById("quotes-error");
 
-/* ---------- Formatting helpers ----------
+/* ---------- Formatting helpers ---------- */
 
 /**
  * Formats a date as e.g. "Nov 16, 2026".
  * Uses UTC so a date-only value like "2026-11-16" is not shifted
- * to the previous in the time zones behind UTC.
+ * to the previous day in the time zones behind UTC.
  */
 function formatDate(date) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -142,14 +142,25 @@ function redirectToLogin() {
   window.location.replace(LOGIN_URL);
 }
 
-/** Shows text in the shared message area. */
-function showPageMessage(text) {
+/** Shows text in the status message area. */
+function showStatus(text) {
+  quotesStatus.textContent = text;
+  quotesStatus.classList.remove("d-none");
+}
+
+/** Hides the status message area. */
+function hideStatus() {
+  quotesStatus.classList.add("d-none");
+}
+
+/** Shows text in the error message area. */
+function showErrorMessage(text) {
   quotesError.textContent = text;
   quotesError.classList.remove("d-none");
 }
 
-/** Hides the shared message area. */
-function hidePageMessage() {
+/** Hides the error message area. */
+function hideErrorMessage() {
   quotesError.classList.add("d-none");
 }
 
@@ -198,7 +209,7 @@ async function deleteQuote(quote, button) {
   } catch (err) {
     if (handleCommonApiErrors(err)) return;
     button.disabled = false;
-    showPageMessage(err.message);
+    showErrorMessage(err.message);
     return;
   }
   loadQuotes();
@@ -230,7 +241,7 @@ function createTitle(quote) {
   });
 }
 
-/** Creates a half-width title showing a label above a dollar amount. */
+/** Creates a half-width tile showing a label above a dollar amount. */
 function createPriceTile(label, amount) {
   const column = makeElement({ classes: ["col-6"] });
   const tile = makeElement({ classes: ["bg-body-tertiary", "rounded", "p-3"] });
@@ -251,7 +262,7 @@ function createPriceTile(label, amount) {
 }
 
 /**
- * Describes how the quotes price compares with NADAC,
+ * Describes how the quote's price compares with NADAC,
  * e.g. "$12.50 (8.00%) above NADAC".
  * @returns {{text: string, className: string}} Text plus a color class:
  *  grey when equal, warning when above, success when below.
@@ -504,12 +515,12 @@ async function loadQuotes() {
     redirectToLogin();
     return;
   }
+  hideErrorMessage();
 
   // Loading state: block page changes until the request finishes.
   quotesPreviousButton.disabled = true;
   quotesNextButton.disabled = true;
-  showPageMessage("loading...");
-
+  showStatus("Loading");
   let response;
   try {
     response = await fetchQuotesPage(quotesCurrentPage);
@@ -520,7 +531,8 @@ async function loadQuotes() {
       redirectToLogin();
       return;
     }
-    showPageMessage(err.message);
+    hideStatus();
+    showErrorMessage(err.message);
     updatePaginationButtons();
     return;
   }
@@ -542,7 +554,8 @@ async function loadQuotes() {
     1,
   );
 
-  hidePageMessage();
+  hideStatus();
+  hideErrorMessage();
   renderQuotes(response.items, response.total);
   renderPagination(response);
 }
