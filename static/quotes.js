@@ -120,19 +120,20 @@ function makeButton(text, classes) {
  * @returns {{label: HTMLLabelElement, input: HTMLInputElement}}
  */
 function makeField({ id, label, attrs }) {
-  return {
-    label: makeElement({
-      tag: "label",
-      classes: ["small", "text-body-secondary"],
-      text: label,
-      attrs: { htmlFor: id },
-    }),
-    input: makeElement({
-      tag: "input",
-      classes: ["form-control"],
-      attrs: { id, required: true, ...attrs },
-    }),
-  };
+  const wrapper = makeElement({ classes: ["mb-3"] });
+  const labelEl = makeElement({
+    tag: "label",
+    classes: ["small", "text-body-secondary"],
+    text: label,
+    attrs: { htmlFor: id },
+  });
+  const input = makeElement({
+    tag: "input",
+    classes: ["form-control"],
+    attrs: { id, required: true, ...attrs },
+  });
+  wrapper.append(labelEl, input);
+  return { wrapper, input };
 }
 
 /* ---------- Page messages and navigation ---------- */
@@ -428,12 +429,9 @@ function buildEditBody(quote, { onSave, onCancel }) {
       classes: ["small", "text-body-secondary"],
       text: "Editing quote",
     }),
-    price.label,
-    price.input,
-    quantity.label,
-    quantity.input,
-    date.label,
-    date.input,
+    price.wrapper,
+    quantity.wrapper,
+    date.wrapper,
     message,
     buttons,
   );
