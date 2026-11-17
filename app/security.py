@@ -24,8 +24,10 @@ from app.models import User
 
 load_dotenv()
 
-
 SECRET_KEY = os.environ["SECRET_KEY"]
+if len(SECRET_KEY) < 32:
+    raise RuntimeError("SECRET_KEY must be at least 32 characters long")
+
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 ALGORITHM = "HS256"
 
