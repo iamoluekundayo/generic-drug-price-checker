@@ -27,7 +27,10 @@ def to_quote_result(db: Session, quote: Quote) -> QuoteResult:
     drug = quote.drug
     price = get_latest_price(db, drug.id, quote.quote_date)
     if price is None:
-        raise HTTPException(status_code=404, detail="Price not found")
+        raise RuntimeError(
+            f"Quote {quote.id}: no NADAC price for drug {drug.id}"
+            f"on or before {quote.quote_date}"
+        )
     compare_numbers = get_compare_numbers(
         price.nadac_per_unit, quote.quantity, quote.quoted_price
     )
