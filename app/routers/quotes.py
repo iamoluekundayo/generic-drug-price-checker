@@ -28,7 +28,7 @@ def to_quote_result(db: Session, quote: Quote) -> QuoteResult:
     price = get_latest_price(db, drug.id, quote.quote_date)
     if price is None:
         raise RuntimeError(
-            f"Quote {quote.id}: no NADAC price for drug {drug.id}"
+            f"Quote {quote.id}: no NADAC price for drug {drug.id} "
             f"on or before {quote.quote_date}"
         )
     compare_numbers = get_compare_numbers(
