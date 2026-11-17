@@ -3,14 +3,15 @@
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Annotated
-from zoneinfo import ZoneInfo
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field
 from pydantic_core import PydanticCustomError
 
+from app.dates import today_eastern
+
 
 def not_in_future(value: date) -> date:
-    if value > datetime.now(ZoneInfo("America/New_York")).date():
+    if value > today_eastern():
         raise PydanticCustomError("date_in_future", "Quote date can't be in the future")
     return value
 

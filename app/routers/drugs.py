@@ -1,12 +1,12 @@
 """HTTP routes for searching drugs, viewing their NADAC price history, and comparing a pharmacy's quoted price against the NADAC benchmark."""
 
-from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.dates import today_eastern
 from app.db import get_db
 from app.models import Drug, Price
 from app.pricing import get_compare_numbers, get_latest_price, latest_prices_subquery
@@ -102,7 +102,7 @@ def compare(body: CompareRequest, db: Annotated[Session, Depends(get_db)]):
     drug = db.get(Drug, body.drug_id)
     if drug is None:
         raise HTTPException(status_code=404, detail="Drug not found")
-    quote_date = body.quote_date or date.today()
+    quote_date = body.quote_date or today_eastern()
     price = get_latest_price(db, drug.id, quote_date)
     if price is None:
         raise HTTPException(
