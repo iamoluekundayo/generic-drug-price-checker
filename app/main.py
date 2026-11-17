@@ -1,3 +1,12 @@
+"""FASTAPI application entry point.
+
+Creates the app, creates database tables at startup, sets up rate
+limiting and error handling, includes the API routers, and servers the
+front end from ``static/``.
+
+Run with: ``uvicorn app.main:app --reload``
+"""
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -14,10 +23,13 @@ from app.routers import auth, drugs, quotes, users
 
 @asynccontextmanager
 async def lifespan(app):
-    # Generate the tables, runs once
+    """Run setup when the app starts and clean up when it stops.
+
+    Startup: create any missing database tables.
+    Shutdown: close the engine's pooled database connections.
+    """
     Base.metadata.create_all(engine)
     yield
-    # shutdown: runs once, when the app stops
     engine.dispose()
 
 
@@ -32,6 +44,7 @@ app.include_router(quotes.router)
 
 @app.get("/health")
 def health_check():
+    """Report that the server is running."""
     return {"status": "ok"}
 
 
@@ -44,6 +57,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     )
 
 
+# Mus stay last: a mount at "/" matches every path, so any route add after it is unreachable.
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 # TODO: Clean missing or dirty values
 # TODO: Set last_seen on each import
