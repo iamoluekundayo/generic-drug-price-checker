@@ -2,10 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased, selectinload
 
 from app.db import get_db
-from app.models import Drug, Quote, User
+from app.models import Drug, Price, Quote, User
 from app.pricing import get_compare_numbers, get_latest_price
 from app.schemas import QuoteCreate, QuotePage, QuoteResult, QuoteUpdate
 from app.security import get_current_user
@@ -22,10 +22,13 @@ def get_own_quote(db: Session, quote_id: int, user_id: int) -> Quote:
     return quote
 
 
-def to_quote_result(db: Session, quote: Quote) -> QuoteResult:
+def to_quote_result(
+    db: Session, quote: Quote, price: Price | None = None
+) -> QuoteResult:
     # quote --> drug --> price
     drug = quote.drug
-    price = get_latest_price(db, drug.id, quote.quote_date)
+    if price is None:
+        price = get_latest_price(db, drug.id, quote.quote_date)
     if price is None:
         raise RuntimeError(
             f"Quote {quote.id}: no NADAC price for drug {drug.id} "
@@ -87,14 +90,26 @@ def get_quotes(
     total = db.scalar(
         select(func.count()).select_from(Quote).where(Quote.user_id == current_user.id)
     )
-    quote_instances = db.scalars(
-        select(Quote)
+    p = aliased(Price)
+    price_id = (
+        select(p.id)
+        .where(p.drug_id == Quote.drug_id, p.effective_date <= Quote.quote_date)
+        .order_by(p.effective_date.desc())
+        .limit(1)
+        .correlate(Quote)
+        .scalar_subquery()
+    )
+    rows = db.execute(
+        select(Quote, Price)
+        .select_from(Quote)
+        .outerjoin(Price, Price.id == price_id)
         .where(Quote.user_id == current_user.id)
         .order_by(Quote.created_at.desc(), Quote.id.desc())
+        .options(selectinload(Quote.drug))
         .limit(page_size)
         .offset((page - 1) * page_size)
     ).all()
-    quotes_list = [to_quote_result(db, quote) for quote in quote_instances]
+    quotes_list = [to_quote_result(db, quote, price) for quote, price in rows]
     return QuotePage(items=quotes_list, total=total, page=page, page_size=page_size)
 
 
