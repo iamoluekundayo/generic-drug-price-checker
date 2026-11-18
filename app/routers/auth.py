@@ -22,7 +22,10 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserResult, status_code=201)
-def register(body: UserCreate, db: Annotated[Session, Depends(get_db)]) -> User:
+@limiter.limit("3/hour")
+def register(
+    body: UserCreate, db: Annotated[Session, Depends(get_db)], request: Request
+) -> User:
     """Create a new user account.
 
     The email is normalized to lowercase so that addresses differing only in
