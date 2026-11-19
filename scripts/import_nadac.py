@@ -1,41 +1,73 @@
 """
 Load a NADAC weekly price file into the database.
 
-The CSV has one row per NDC per weekly list, so a years's file have over a million rows. A price, however, changes only about once a month. The script therefore stores:
+The CSV has one row per NDC per weekly list, so a years's file has over a million rows. A price, however, changes only about once a month. The script therefore stores:
 
 * one ``Drug`` per NDC, and
 * one ``Price`` per (NDC, effective date), skipping the weekly repeats
 
-The import is idempotent: running it again on the same adds nothing.
+The import is idempotent: running it again on the same file adds nothing.
 """
 
 import csv
+import os
+import sys
 from datetime import datetime
 from decimal import Decimal
+from pathlib import Path
 
+import httpx
 from sqlalchemy import select
 
 from app.db import Base, SessionLocal, engine
 from app.models import Drug, Price
 
-CSV_PATH = "data/nadac-national-average-drug-acquisition-cost-10-21-2026.csv"
+
+def download_csv(url, dest):
+    """Download a file from ``url`` and save it to ``dest``.
+
+    The file is streamed to ``<dest>.part`` first and renamed to ``dest`` only
+    after the whole download succeeds, so ``dest`` is never left half-written.
+    An existing ``dest`` is replaced.
+
+    On a network error or an error status (4xx/5xx), the partial file is
+    removed and the script exits with a message.
+    """
+    part_path = f"{dest}.part"
+    try:
+        with httpx.stream("GET", url, timeout=30, follow_redirects=True) as response:
+            response.raise_for_status()
+            with open(part_path, "wb") as file:
+                file.writelines(response.iter_bytes())
+        # Atomic rename: dest is either the old file or the complete new one, never partial.
+        os.replace(part_path, dest)
+    except httpx.HTTPError as error:
+        Path(part_path).unlink(missing_ok=True)
+        sys.exit(f"Download failed: {error}")
 
 
 def main():
     """Read the CSV and insert any drugs and prices not already stored.
 
     Steps:
-        1. Create the tables if they do not exist yet.
-        2. Load the NDCs and (NDC, effective date) pairs already in the database, so each CSV row can be checked without a query.
-        3. Walk the CSV once, adding new drugs and new prices.
-        4. Commit everything in a single transaction and print the counts.
+        1. Download data via httpx and store into CSV
+        2. Create the tables if they do not exist yet.
+        3. Load the NDCs and (NDC, effective date) pairs already in the database, so each CSV row can be checked without a query.
+        4. Walk the CSV once, adding new drugs and new prices.
+        5. Commit everything in a single transaction and print the counts.
     """
+
+    final_path = "data/nadac.csv"
+    if len(sys.argv) != 2:
+        sys.exit("Usage: python -m scripts.import_nadac <csv_url")
+    download_csv(sys.argv[1], final_path)
 
     # create_all only adds missing tables
     Base.metadata.create_all(engine)
+
     with (
         open(
-            CSV_PATH,
+            final_path,
             newline="",
             encoding="utf-8",
         ) as csv_file,
@@ -93,14 +125,14 @@ def main():
 
 
 def parse_row(row):
-    """Convert on raw CSV row into typed values.
+    """Convert one raw CSV row into typed values.
 
     Args:
         row: A dictionary from ``csv.DictReader``, keyed by the CSV headers.
 
     Returns:
         A dictionary with the NDC and descriptive text unchanged, the OTC flag
-        as a bool, the price as a  ``Decimal`` (exact, unlike float), and both
+        as a bool, the price as a ``Decimal`` (exact, unlike float), and both
         dates as ``date`` objects.
 
     """
