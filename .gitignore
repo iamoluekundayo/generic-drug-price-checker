@@ -231,3 +231,7 @@ data/
 .vscode/settings.json
 
 node_modules/
+
+#test files
+test.py
+latest_prices.csv
