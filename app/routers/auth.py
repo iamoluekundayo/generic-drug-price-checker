@@ -30,11 +30,12 @@ def register(
 
     The email is normalized to lowercase so that addresses differing only in
     case are treated as the same account. The plain-text password is hashed
-    and then discard.
+    and then discarded.
 
     Args:
         body: Registration details (name, email and plain-text password).
         db: Database session, provided per request by ``get_db``.
+        request: Incoming request, used by the rate limiter to read the client's IP
 
     Returns:
         The newly created user. ``response_model=UserResult`` limits the
