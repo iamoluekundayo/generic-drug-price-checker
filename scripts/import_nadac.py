@@ -1,12 +1,18 @@
-"""
-Load a NADAC weekly price file into the database.
+"""Download the NADAC weekly price file and load it into the database.
 
-The CSV has one row per NDC per weekly list, so a years's file has over a million rows. A price, however, changes only about once a month. The script therefore stores:
+The CSV has one row per NDC per weekly list, so a years's file has over
+a million rows. A price, however, changes only about once a month. The
+script therefore stores:
 
 * one ``Drug`` per NDC, and
 * one ``Price`` per (NDC, effective date), skipping the weekly repeats
 
 The import is idempotent: running it again on the same file adds nothing.
+
+Usage (from the project root)::
+
+    python -m scripts.import_nadac              # find the current file automatically
+    python -m scripts.import_nadac <csv_url>    # use a specific file
 """
 
 import csv
@@ -21,6 +27,34 @@ from sqlalchemy import select
 
 from app.db import Base, SessionLocal, engine
 from app.models import Drug, Price
+
+# The dataset's description on data.medicaid.gov, which lists the current CSV download link.
+METADATA_URL = "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/fbb83258-11c7-47f5-8b18-5f8e79f7e704"
+
+
+def find_download_url():
+    """Return the download URL of the current NADAC CSV.
+
+    Reads it from the dataset's metadata, since the file's URL changes with
+    each new release
+
+    Exits the script if the request fails (network error or 4xx/5xx status)
+    or if the metadata doesn't contain a download URL.
+
+
+    One network error or an error status(4xx/5xx), the system exits"""
+    try:
+        response = httpx.get(METADATA_URL, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        download_url = data["distribution"][0]["downloadURL"]
+    except httpx.HTTPError as error:
+        sys.exit(f"Metadata request failed: {error}")
+    except (KeyError, IndexError):
+        # The request worked, but the JSON isn't shaped as expected.
+        sys.exit("Could not find the download URL in the NADAC metadata")
+
+    return download_url
 
 
 def download_csv(url, dest):
@@ -47,20 +81,30 @@ def download_csv(url, dest):
 
 
 def main():
-    """Read the CSV and insert any drugs and prices not already stored.
+    """Download the NADAC CSV and add any drugs and prices not already stored.
 
     Steps:
-        1. Download data via httpx and store into CSV
-        2. Create the tables if they do not exist yet.
-        3. Load the NDCs and (NDC, effective date) pairs already in the database, so each CSV row can be checked without a query.
-        4. Walk the CSV once, adding new drugs and new prices.
-        5. Commit everything in a single transaction and print the counts.
+        1. Use the CSV URL given on the command line, or look up the current one.
+        2. Download the CSV to ``data/nadac.csv``.
+        3. Create the tables if they do not exist yet.
+        4. Load the NDCs and (NDC, effective date) pairs already in the database, so each CSV row can be checked without a query.
+        5. Walk the CSV once, adding new drugs and new prices.
+        6. Commit everything in a single transaction and print the counts.
     """
 
     final_path = "data/nadac.csv"
-    if len(sys.argv) != 2:
-        sys.exit("Usage: python -m scripts.import_nadac <csv_url")
-    download_csv(sys.argv[1], final_path)
+    Path(final_path).parent.mkdir(exist_ok=True)
+
+    # sys.argv[0] is the script itself, so a URL argument makes the length 2.
+    if len(sys.argv) == 2:
+        download_url = sys.argv[1]
+    elif len(sys.argv) == 1:
+        download_url = find_download_url()
+    else:
+        sys.exit("Usage: python -m scripts.import_nadac [csv_url]")
+
+    print(download_url)
+    download_csv(download_url, final_path)
 
     # create_all only adds missing tables
     Base.metadata.create_all(engine)
@@ -120,8 +164,8 @@ def main():
 
         # One commit: if anything fails, the whole import is rolled back
         session.commit()
-        print(new_drug_count)
-        print(new_price_count)
+        print(f"New drugs: {new_drug_count}")
+        print(f"New prices: {new_price_count}")
 
 
 def parse_row(row):
