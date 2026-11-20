@@ -59,7 +59,7 @@ async function api(path, options = {}) {
       body: body,
     });
   } catch (err) {
-    throw new Error("Couldn't reach the server");
+    throw new Error("Couldn't reach the server", { cause: err });
   }
 
   const statusCode = response.status;
@@ -120,24 +120,27 @@ async function updateNav() {
   const quotes = document.getElementById("search-quotes");
 
   const token = getToken();
+  let userInfo;
   if (token) {
     try {
-      const userInfo = await api("/users/me");
-      navLogout.addEventListener("click", () => {
-        clearToken();
-        window.location.href = "/";
-      });
-      navLogout.classList.remove("d-none");
-      navLogin.classList.add("d-none");
-      if (greeting) {
-        const firstName = userInfo.first_name;
-        greeting.textContent =
-          "Hi, " + firstName.charAt(0).toUpperCase() + firstName.slice(1);
-      }
-      if (quotes) {
-        quotes.classList.remove("d-none");
-      }
-    } catch (err) {}
+      userInfo = await api("/users/me");
+    } catch (err) {
+      console.error(err);
+      return;
+    }
+    navLogout.addEventListener("click", () => {
+      window.location.href = "/";
+    });
+    navLogout.classList.remove("d-none");
+    navLogin.classList.add("d-none");
+    if (greeting) {
+      const firstName = userInfo.first_name;
+      greeting.textContent =
+        "Hi, " + firstName.charAt(0).toUpperCase() + firstName.slice(1);
+    }
+    if (quotes) {
+      quotes.classList.remove("d-none");
+    }
   }
 }
 updateNav();
