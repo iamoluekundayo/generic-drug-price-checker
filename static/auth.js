@@ -83,7 +83,7 @@ registerForm.addEventListener("submit", async (event) => {
   let token;
   try {
     token = await login(userResult.email, registerPassword.value);
-  } catch (err) {
+  } catch {
     registerError.classList.remove("d-none");
     registerError.classList.remove("alert-danger");
     registerError.classList.add("alert-info");
