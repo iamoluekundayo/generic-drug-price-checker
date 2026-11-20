@@ -54,7 +54,7 @@ class Price(Base):
     classification: Mapped[str]
     drug: Mapped["Drug"] = relationship(back_populates="prices")
 
-    # using (NDC, effective date) as price's identify
+    # using (NDC, effective date) as price's identity
     __table_args__ = (
         UniqueConstraint(
             "drug_id", "effective_date", name="uq_prices_drug_id_effective_date"

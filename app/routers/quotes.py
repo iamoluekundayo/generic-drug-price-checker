@@ -22,7 +22,7 @@ def get_own_quote(db: Session, quote_id: int, user_id: int) -> Quote:
     """Return the quote if it exists and belongs to the user, otherwise raise 404.
 
     Another user's quote gets the same 404 as a missing one, so the API never
-    reveals which quotes ids exists.
+    reveals which quotes ids exist.
     """
     quote = db.scalars(
         select(Quote).where(Quote.id == quote_id, Quote.user_id == user_id)
@@ -37,8 +37,8 @@ def to_quote_result(
 ) -> QuoteResult:
     """Build the API response for saved quotes.
 
-    Users the NADAC price on or before the quote's date. Pass ``price`` when it
-    has already been loaded (as Get /quotes does) to skip the lookup.
+    Uses the NADAC price on or before the quote's date. Pass ``price`` when it
+    has already been loaded (as GET /quotes does) to skip the lookup.
 
     Raises RuntimeError if no price exists. POST and PATCH already reject dates
     without a price, so reaching that means the stored data is broken.
@@ -128,7 +128,7 @@ def get_quotes(
         .correlate(Quote)
         .scalar_subquery()
     )
-    # Load each quote with it price in one query, and all their drugs in one more,
+    # Load each quote with its price in one query, and all their drugs in one more,
     # instead of one price query and one drug query per quote.
     # outerjoin keeps a quote even if no price matches; to_quote_result then
     # looks it up again and raises if it's still missing.
