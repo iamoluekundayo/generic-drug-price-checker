@@ -185,10 +185,7 @@ def update_quote(
             )
         quote.quote_date = updates.quote_date
     db.commit()
-    return to_quote_result(
-        db,
-        quote,
-    )
+    return to_quote_result(db, quote, price)
 
 
 @router.delete("/{quote_id}", status_code=status.HTTP_204_NO_CONTENT)
